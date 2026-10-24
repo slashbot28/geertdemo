@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "site": "geert-demo",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

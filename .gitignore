@@ -1,0 +1,8 @@
+# Firebase
+.firebase/
+firebase-debug.log*
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
