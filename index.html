@@ -1221,7 +1221,12 @@
     
     let autoBgActive = true;
     function toggleAutoBg() {
-      autoBgActive = !autoBgActive;
+      if (window.bgEngine) {
+        autoBgActive = !window.bgEngine.autoCycle;
+        window.bgEngine.autoCycle = autoBgActive;
+      } else {
+        autoBgActive = !autoBgActive;
+      }
       const btn = document.getElementById('btn-bg-auto');
       if (btn) {
         btn.innerText = autoBgActive ? 'AUTO: AAN' : 'AUTO: UIT';
@@ -1273,6 +1278,10 @@
         showPinchHud(sc.title);
         const titleEl = document.getElementById('tour-scene-title');
         if (titleEl) titleEl.innerText = sc.title;
+
+        if (window.bgEngine && autoBgActive) {
+          window.bgEngine.next();
+        }
       }
     }
 

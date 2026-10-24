@@ -399,20 +399,41 @@
     }
 
     next() {
+      this.cycleTimer = 0;
       this.applyEffect(this.currentIndex + 1);
     }
 
     prev() {
+      this.cycleTimer = 0;
       this.applyEffect(this.currentIndex - 1);
     }
 
     setEffectById(id) {
+      this.cycleTimer = 0;
       const idx = this.effects.findIndex(e => e.id === id);
       if (idx !== -1) this.applyEffect(idx);
     }
 
     render(time) {
       if (!this.active) return;
+
+      // Autonomous Background Auto-Cycling (every cycleDuration seconds)
+      if (this.autoCycle) {
+        if (this.lastTime === undefined || this.lastTime === null) {
+          this.lastTime = time;
+        }
+        const dt = time - this.lastTime;
+        this.lastTime = time;
+        if (dt > 0 && dt < 1.0) {
+          this.cycleTimer += dt;
+          if (this.cycleTimer >= this.cycleDuration) {
+            this.cycleTimer = 0;
+            this.applyEffect(this.currentIndex + 1);
+          }
+        } else {
+          this.lastTime = time;
+        }
+      }
 
       const eff = this.effects[this.currentIndex];
 
@@ -546,3 +567,4 @@
   window.SuperFXBackgroundEngine = SuperFXBackgroundEngine;
 
 })(window);
+

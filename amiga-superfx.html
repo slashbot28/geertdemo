@@ -785,7 +785,8 @@
         title: 'SCÈNE 1/5: HERO GOLF + VERLET STOF',
         flightMode: 0,
         sim: 'cloth',
-        textPreset: 'GURU-EMULATION',
+        textPreset: 'GEERT-VERHULST',
+        bg: 'mandala',
         copperHue: 0,
         sfx: 'coin'
       },
@@ -794,16 +795,18 @@
         title: 'SCÈNE 2/5: 3D BANNER + BOIDS ZWERM',
         flightMode: 1,
         sim: 'boids',
-        textPreset: 'GURU-EMULATION',
+        textPreset: 'GEERT-VERHULST',
+        bg: 'lattice',
         copperHue: 45,
         sfx: 'powerup'
       },
       {
         id: 2,
-        title: 'SCÈNE 3/5: ORBIT + RESONANTE SNAREN',
+        title: 'SCÈNE 3/5: 3D ORBIT CAROUSEL',
         flightMode: 2,
-        sim: 'strings',
+        sim: 'none',
         textPreset: 'GEERT-VERHULST',
+        bg: 'chrome',
         copperHue: 285,
         sfx: 'laser'
       },
@@ -812,7 +815,8 @@
         title: 'SCÈNE 4/5: 3D VORTEX + VERLET KNIP',
         flightMode: 3,
         sim: 'cloth',
-        textPreset: 'GURU-EMULATION',
+        textPreset: 'GEERT-VERHULST',
+        bg: 'glsl027',
         copperHue: 155,
         sfx: 'jump'
       },
@@ -821,7 +825,8 @@
         title: 'SCÈNE 5/5: FULL SPECTRUM FINALE + BOIDS',
         flightMode: 0,
         sim: 'boids',
-        textPreset: 'GURU-EMULATION',
+        textPreset: 'GEERT-VERHULST',
+        bg: 'drift',
         copperHue: 330,
         sfx: 'explosion'
       }
@@ -833,10 +838,14 @@
     let currentSceneIdx = 0;
     let copperPaletteOffset = 0;
 
-    
     let autoBgActive = true;
     function toggleAutoBg() {
-      autoBgActive = !autoBgActive;
+      if (window.bgEngine) {
+        autoBgActive = !window.bgEngine.autoCycle;
+        window.bgEngine.autoCycle = autoBgActive;
+      } else {
+        autoBgActive = !autoBgActive;
+      }
       const btn = document.getElementById('btn-bg-auto');
       if (btn) {
         btn.innerText = autoBgActive ? 'AUTO: AAN' : 'AUTO: UIT';
