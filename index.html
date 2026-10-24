@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Amiga 1200 AGA WebGL Demo - GEERT VERHULST</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
@@ -30,6 +30,7 @@
       width: 100%;
       height: 100%;
       z-index: 1;
+      touch-action: none;
     }
 
     /* Amiga Workbench Top Bar */
@@ -38,13 +39,13 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 30px;
+      height: 32px;
       background: linear-gradient(180deg, #0055aa 0%, #002b66 100%);
       border-bottom: 2px solid #55aaff;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
+      padding: 0 12px;
       font-size: 11px;
       color: #fff;
       text-shadow: 1px 1px #000;
@@ -56,6 +57,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .amiga-tick {
@@ -66,6 +68,54 @@
       box-shadow: 0 0 6px #ff8800;
       border-radius: 2px;
       animation: pulse 1.2s infinite alternate;
+    }
+
+    #ui-toggle-btn {
+      background: #003366;
+      border: 2px outset #00d4ff;
+      color: #ffea00;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 3px;
+      box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      outline: none;
+      transition: background 0.15s;
+    }
+
+    #ui-toggle-btn:hover, #ui-toggle-btn:active {
+      background: #0055aa;
+      color: #ffffff;
+    }
+
+    /* Pinch to zoom on-screen HUD */
+    #pinch-hud {
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 20, 50, 0.9);
+      border: 2px solid #00d4ff;
+      color: #ffff00;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      padding: 7px 14px;
+      border-radius: 4px;
+      z-index: 27;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+      text-shadow: 1px 1px 0 #000;
+      white-space: nowrap;
+    }
+
+    #pinch-hud.visible {
+      opacity: 1;
     }
 
     @keyframes pulse {
@@ -120,7 +170,7 @@
       position: absolute;
       top: 42px;
       right: 14px;
-      background: rgba(10, 15, 35, 0.82);
+      background: rgba(10, 15, 35, 0.92);
       border: 2px solid #00d4ff;
       border-radius: 6px;
       padding: 12px;
@@ -128,10 +178,59 @@
       flex-direction: column;
       gap: 10px;
       z-index: 25;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(8px);
       box-shadow: 0 4px 20px rgba(0, 212, 255, 0.35);
       font-size: 10px;
-      max-width: 260px;
+      max-width: 280px;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #ui-panel.hidden {
+      display: none !important;
+    }
+
+    .ui-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+      padding-bottom: 6px;
+      margin-bottom: 2px;
+    }
+
+    .close-btn {
+      background: #440011;
+      border: 1px outset #ff3366;
+      color: #ff99bb;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      padding: 3px 6px;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    .close-btn:hover {
+      background: #770022;
+      color: #fff;
+    }
+
+    .scale-control-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 5px 6px;
+      border: 1px solid #0055aa;
+      border-radius: 4px;
+    }
+
+    #text-scale-val {
+      color: #00ffff;
+      font-size: 9px;
+      min-width: 44px;
+      text-align: center;
+      font-weight: bold;
     }
 
     .ui-header {
@@ -251,6 +350,41 @@
       color: #33ff33;
       text-shadow: 0 0 4px #33ff33;
     }
+
+    /* Mobiele optimalisaties (GSM scherm) */
+    @media (max-width: 768px) {
+      #amiga-bar {
+        padding: 0 8px;
+        font-size: 9px;
+      }
+      .amiga-badge span:last-child {
+        display: none;
+      }
+      #amiga-title-text {
+        font-size: 9px;
+        letter-spacing: 0px;
+      }
+      #ui-panel {
+        top: 40px;
+        right: 8px;
+        left: 8px;
+        max-width: none;
+        max-height: calc(100vh - 105px);
+        overflow-y: auto;
+      }
+      .title-amiga {
+        font-size: 17px;
+        letter-spacing: 1px;
+      }
+      .subtitle-geert {
+        font-size: 13px;
+        letter-spacing: 1px;
+      }
+      .click-prompt {
+        font-size: 9px;
+        padding: 10px 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -271,14 +405,29 @@
       <span class="amiga-tick"></span>
       <span>AMIGA 1200 AGA</span>
     </div>
-    <div style="color: #ffd700;">★ GEERT VERHULST DEMO ★</div>
-    <div id="fps-meter">60 FPS</div>
+    <div id="amiga-title-text" style="color: #ffd700;">★ GEERT VERHULST DEMO ★</div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div id="fps-meter">60 FPS</div>
+      <button id="ui-toggle-btn" onclick="toggleUIPanel()">⚙ BESTURING</button>
+    </div>
   </div>
 
   <!-- UI Control Panel -->
   <div id="ui-panel">
-    <div class="ui-header">DEMO BESTURING</div>
+    <div class="ui-panel-header">
+      <div class="ui-header" style="margin-bottom:0;">DEMO BESTURING</div>
+      <button class="close-btn" onclick="toggleUIPanel()" title="Sluiten">✕ SLUIT</button>
+    </div>
     <button id="btn-audio" class="retro-btn audio-btn" onclick="toggleAudio()">♪ GELUID: AAN</button>
+
+    <div style="font-size:8px; color:#88aaff; margin-top:2px;">TEKST FORMAAT (PINCH OF KNOP):</div>
+    <div class="scale-control-box">
+      <button class="retro-btn" style="padding:5px 6px;" onclick="changeTextScale(-0.15)">- KLEINER</button>
+      <span id="text-scale-val">100%</span>
+      <button class="retro-btn" style="padding:5px 6px;" onclick="changeTextScale(0.15)">+ GROTER</button>
+      <button class="retro-btn" style="padding:5px 6px;" onclick="resetTextScale()">RESET</button>
+    </div>
+
     <div style="font-size:8px; color:#88aaff; margin-top:2px;">VLUCHT PATROON:</div>
     <div class="btn-row">
       <button class="retro-btn active" id="btn-mode-0" onclick="setFlightMode(0)">HERO GOLF</button>
@@ -304,8 +453,16 @@
   <!-- CRT Monitor Overlay -->
   <div id="crt-overlay"></div>
 
-  <!-- Three.js library -->
+  <!-- Pinch-to-zoom HUD overlay -->
+  <div id="pinch-hud">🔍 TEKST: 100%</div>
+
+  <!-- Three.js library with CDN fallback -->
   <script src="three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
 
   <script>
     /* =====================================================================
@@ -322,6 +479,51 @@
     let flightMode = 0; // 0: Wave, 1: Orbit, 2: Swarm, 3: Vortex
     let cinematicCam = true;
     let crtEnabled = true;
+
+    // Vinger pinch-to-zoom en UI besturing voor mobiel (GSM)
+    let userTextScale = 1.0;
+    let hudTimer = null;
+
+    function toggleUIPanel() {
+      const panel = document.getElementById('ui-panel');
+      if (!panel) return;
+      panel.classList.toggle('hidden');
+    }
+
+    function showPinchHud(msg) {
+      const hud = document.getElementById('pinch-hud');
+      if (!hud) return;
+      hud.innerText = msg;
+      hud.classList.add('visible');
+      clearTimeout(hudTimer);
+      hudTimer = setTimeout(() => {
+        hud.classList.remove('visible');
+      }, 1400);
+    }
+
+    function updateScaleDisplay() {
+      const pct = Math.round(userTextScale * 100);
+      const valEl = document.getElementById('text-scale-val');
+      if (valEl) valEl.innerText = `${pct}%`;
+      showPinchHud(`🔍 TEKST: ${pct}%`);
+    }
+
+    function changeTextScale(delta) {
+      userTextScale = Math.max(0.35, Math.min(2.5, userTextScale + delta));
+      updateScaleDisplay();
+    }
+
+    function resetTextScale() {
+      userTextScale = 1.0;
+      updateScaleDisplay();
+    }
+
+    function checkInitialUIVisibility() {
+      const panel = document.getElementById('ui-panel');
+      if (panel && window.innerWidth <= 768) {
+        panel.classList.add('hidden');
+      }
+    }
 
     // Word configuration: GEERT (Word 1) and VERHULST (Word 2)
     const NAME_WORD_1 = "GEERT";
@@ -520,8 +722,9 @@
 
       window.addEventListener('resize', onWindowResize);
 
-      // Interactive mouse orbit
-      setupMouseControls();
+      // Interactive touch pinch & mouse orbit
+      setupTouchAndMouseControls();
+      checkInitialUIVisibility();
     }
 
     // -------------------------------------------------------------
@@ -847,6 +1050,12 @@
     function updateFlyingLetters(time) {
       const count = letterMeshes.length;
 
+      // Bereken automatische responsiviteit voor smalle mobiele schermen (GSM portret)
+      const screenAspect = window.innerWidth / Math.max(1, window.innerHeight);
+      const isMobilePortrait = screenAspect < 0.95;
+      const responsiveFactor = isMobilePortrait ? Math.min(0.75, Math.max(0.42, window.innerWidth / 520)) : 1.0;
+      const effectiveScale = userTextScale * responsiveFactor;
+
       letterMeshes.forEach((mesh) => {
         const u = mesh.userData;
         const i = u.index;
@@ -862,12 +1071,12 @@
           case 0: // MODE 0: HERO GOLF (Direct bij opstarten: 100% perfect leesbaar van links naar rechts)
             // Regel 1 (Boven): G - E - E - R - T (Lustrous Gold)
             // Regel 2 (Onder): V - E - R - H - U - L - S - T (Cyber Chrome Cyan)
-            const spacing0 = isGeert ? 3.4 : 2.75;
+            const spacing0 = (isGeert ? 3.4 : 2.75) * effectiveScale;
             tx = (lineIdx - (lineLen - 1) / 2) * spacing0;
 
             // Vloeiende zachte Amiga demoscene sinusgolf
-            const waveY0 = Math.sin(time * 3.2 + lineIdx * 0.5) * 1.1;
-            ty = (isGeert ? 5.2 : 0.8) + waveY0;
+            const waveY0 = Math.sin(time * 3.2 + lineIdx * 0.5) * (1.1 * Math.min(1.0, effectiveScale));
+            ty = (isGeert ? 5.2 : 0.8) * Math.max(0.65, effectiveScale) + waveY0;
             tz = 8.0 + Math.cos(time * 2.2 + lineIdx * 0.45) * 1.6;
 
             // Letters blijven recht naar voren/kijker gericht met subtiele 3D glinstering
@@ -877,10 +1086,8 @@
             break;
 
           case 1: // MODE 1: 3D BANNER (Golvende vliegende banner, altijd van links naar rechts leesbaar)
-            // Alle letters vliegen in één vloeiende golvende 3D ketting,
-            // waarbij G altijd links is en T altijd rechts!
-            const bannerOffset = (i - (count - 1) / 2) * 2.2;
-            const bannerWander = Math.sin(time * 1.2) * 6.0;
+            const bannerOffset = (i - (count - 1) / 2) * (2.2 * effectiveScale);
+            const bannerWander = Math.sin(time * 1.2) * (6.0 * Math.min(1.0, effectiveScale));
             tx = bannerOffset + bannerWander;
 
             ty = 3.0 + Math.sin(time * 3.0 + i * 0.38) * 3.5;
@@ -893,7 +1100,7 @@
 
           case 2: // MODE 2: 3D ORBIT CAROUSEL (Rondom de Boing Ball)
             const angle = time * 1.2 + (i / count) * Math.PI * 2;
-            const radius = 13.0 + Math.sin(time * 1.8 + i * 0.4) * 1.8;
+            const radius = (13.0 + Math.sin(time * 1.8 + i * 0.4) * 1.8) * Math.max(0.5, Math.min(1.3, effectiveScale));
             const tilt = 0.35;
 
             tx = Math.cos(angle) * radius;
@@ -906,7 +1113,7 @@
 
           case 3: // MODE 3: 3D VORTEX PULSE
             const vPhase = (time * 1.5 + (i / count) * Math.PI * 2);
-            const vRad = 8.0 + Math.sin(time * 2.5 + i * 0.3) * 3.5;
+            const vRad = (8.0 + Math.sin(time * 2.5 + i * 0.3) * 3.5) * Math.max(0.5, Math.min(1.3, effectiveScale));
             tx = Math.cos(vPhase) * vRad;
             ty = Math.sin(vPhase) * (vRad * 0.55) + 3.0;
             tz = 5.0 + Math.cos(time * 2.0 + i * 0.4) * 3.0;
@@ -916,10 +1123,15 @@
             break;
         }
 
-        // Vloeiende interpolatie voor zijdezachte overgangen
+        // Vloeiende interpolatie voor positie
         mesh.position.x += (tx - mesh.position.x) * 0.14;
         mesh.position.y += (ty - mesh.position.y) * 0.14;
         mesh.position.z += (tz - mesh.position.z) * 0.14;
+
+        // Vloeiende schaalverandering via vinger-pinch of knoppen
+        mesh.scale.x += (effectiveScale - mesh.scale.x) * 0.2;
+        mesh.scale.y += (effectiveScale - mesh.scale.y) * 0.2;
+        mesh.scale.z += (effectiveScale - mesh.scale.z) * 0.2;
 
         if (useLookAtCamera) {
           mesh.lookAt(camera.position);
@@ -1241,7 +1453,60 @@
     let targetCamX = 0, targetCamY = 5, targetCamZ = 28;
     let isMouseDown = false;
 
-    function setupMouseControls() {
+    function setupTouchAndMouseControls() {
+      // Touch pinch & pan controls voor mobiel (GSM)
+      let initialPinchDistance = 0;
+      let startPinchScale = 1.0;
+      let isPinching = false;
+
+      window.addEventListener('touchstart', (e) => {
+        // Negeer touch op menuknoppen en top bar
+        if (e.target.closest('#ui-panel') || e.target.closest('#ui-toggle-btn') || e.target.closest('#amiga-bar') || e.target.closest('#start-screen')) {
+          return;
+        }
+
+        if (e.touches.length === 2) {
+          isPinching = true;
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          initialPinchDistance = Math.hypot(dx, dy);
+          startPinchScale = userTextScale;
+          showPinchHud(`🔍 TEKST: ${Math.round(userTextScale * 100)}%`);
+        } else if (e.touches.length === 1) {
+          isPinching = false;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (e.target.closest('#ui-panel') || e.target.closest('#start-screen')) {
+          return;
+        }
+
+        if (e.touches.length === 2 && initialPinchDistance > 0) {
+          if (e.cancelable) e.preventDefault(); // Voorkom default browser zoom
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          const currentDistance = Math.hypot(dx, dy);
+          const factor = currentDistance / initialPinchDistance;
+
+          // Vloeiend vergroten en verkleinen met de vingers
+          userTextScale = Math.max(0.35, Math.min(2.5, startPinchScale * factor));
+          updateScaleDisplay();
+        } else if (e.touches.length === 1 && !isPinching && !cinematicCam) {
+          // Hand cam rotatie met vinger op GSM
+          mouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+          mouseY = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) {
+          isPinching = false;
+          initialPinchDistance = 0;
+        }
+      }, { passive: true });
+
+      // Muis beweging
       window.addEventListener('mousemove', (e) => {
         if (!cinematicCam) {
           mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -1249,12 +1514,19 @@
         }
       });
 
+      // Muiswiel / trackpad pinch support
       window.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          userTextScale = Math.max(0.35, Math.min(2.5, userTextScale - e.deltaY * 0.003));
+          updateScaleDisplay();
+          return;
+        }
         if (!cinematicCam) {
           targetCamZ += e.deltaY * 0.05;
           targetCamZ = Math.max(12, Math.min(50, targetCamZ));
         }
-      });
+      }, { passive: false });
     }
 
     function toggleCamMode() {
