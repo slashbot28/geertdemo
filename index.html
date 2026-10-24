@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Amiga 1200 AGA WebGL Demo - GEERT VERHULST</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500;700;900&family=VT323&display=swap');
 
     * {
       box-sizing: border-box;
@@ -33,111 +33,371 @@
       touch-action: none;
     }
 
-    /* Amiga Workbench Top Bar */
+    
+    /* === MODERN CYBER-RETRO AMIGA STYLING === */
+    :root {
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff0077;
+      --neon-gold: #ffd700;
+      --neon-purple: #a855f7;
+      --bg-glass: rgba(6, 12, 28, 0.78);
+      --border-glow: rgba(0, 240, 255, 0.4);
+    }
+
+    /* Amiga Workbench Top Bar with Frosted Glassmorphism */
     #amiga-bar {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 32px;
-      background: linear-gradient(180deg, #0055aa 0%, #002b66 100%);
-      border-bottom: 2px solid #55aaff;
+      height: 38px;
+      background: linear-gradient(180deg, rgba(8, 18, 42, 0.88) 0%, rgba(3, 8, 20, 0.75) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1.5px solid var(--border-glow);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 12px;
-      font-size: 11px;
+      padding: 0 14px;
+      font-size: 10px;
       color: #fff;
-      text-shadow: 1px 1px #000;
       z-index: 20;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 240, 255, 0.15);
     }
 
+    /* Authentic Commodore Amiga Rainbow Tick Badge */
     .amiga-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
       flex-shrink: 0;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      letter-spacing: 1px;
     }
 
-    .amiga-tick {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background: #ff4400;
-      box-shadow: 0 0 6px #ff8800;
+    .amiga-rainbow-tick {
+      width: 12px;
+      height: 14px;
+      background: linear-gradient(180deg, #ff0000 0%, #ff8800 20%, #ffff00 40%, #00cc00 60%, #0088ff 80%, #9900ff 100%);
       border-radius: 2px;
-      animation: pulse 1.2s infinite alternate;
+      box-shadow: 0 0 8px rgba(255, 128, 0, 0.8), 0 0 14px rgba(0, 212, 255, 0.5);
+      animation: rainbowGlow 2s infinite alternate;
+      clip-path: polygon(0 40%, 40% 100%, 100% 0, 45% 75%, 20% 50%);
     }
 
-    #ui-toggle-btn {
-      background: #003366;
-      border: 2px outset #00d4ff;
-      color: #ffea00;
-      font-family: 'Press Start 2P', monospace;
+    @keyframes rainbowGlow {
+      0% { filter: drop-shadow(0 0 3px #ff0055); }
+      100% { filter: drop-shadow(0 0 8px #00ffff); }
+    }
+
+    #amiga-title-text {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #fff 0%, #ffd700 50%, #ff8800 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    /* Live Equalizer Bars in Top Bar */
+    .top-eq-bar {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2.5px;
+      height: 14px;
+      margin: 0 4px;
+    }
+    .top-eq-bar .eq-b {
+      width: 3px;
+      background: linear-gradient(0deg, #00ff66 0%, #ffff00 70%, #ff0055 100%);
+      border-radius: 1px;
+      height: 4px;
+      transition: height 0.1s ease;
+    }
+    .top-eq-bar.active .eq-b:nth-child(1) { animation: eqAnim1 0.4s infinite alternate; }
+    .top-eq-bar.active .eq-b:nth-child(2) { animation: eqAnim2 0.35s infinite alternate 0.1s; }
+    .top-eq-bar.active .eq-b:nth-child(3) { animation: eqAnim3 0.45s infinite alternate 0.05s; }
+    .top-eq-bar.active .eq-b:nth-child(4) { animation: eqAnim2 0.3s infinite alternate 0.15s; }
+    .top-eq-bar.active .eq-b:nth-child(5) { animation: eqAnim1 0.5s infinite alternate 0.08s; }
+
+    @keyframes eqAnim1 { 0% { height: 3px; } 100% { height: 14px; } }
+    @keyframes eqAnim2 { 0% { height: 5px; } 100% { height: 12px; } }
+    @keyframes eqAnim3 { 0% { height: 2px; } 100% { height: 13px; } }
+
+    /* Top Bar Pill Buttons */
+    .pill-btn {
+      text-decoration: none;
+      font-family: 'Orbitron', monospace;
       font-size: 8px;
-      padding: 4px 8px;
-      cursor: pointer;
-      border-radius: 3px;
-      box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 5px;
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(8px);
+      letter-spacing: 0.5px;
+    }
+    .pill-btn:hover {
+      transform: translateY(-1.5px);
+      box-shadow: 0 4px 15px currentColor;
+    }
+
+    #ui-toggle-btn {
+      background: linear-gradient(135deg, rgba(0, 50, 100, 0.7), rgba(0, 15, 50, 0.9));
+      border: 1px solid var(--neon-cyan);
+      color: #00ffff;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 8px;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       outline: none;
-      transition: background 0.15s;
+      transition: all 0.2s ease;
     }
 
-    #ui-toggle-btn:hover, #ui-toggle-btn:active {
-      background: #0055aa;
+    #ui-toggle-btn:hover {
+      background: linear-gradient(135deg, #0055aa, #002255);
       color: #ffffff;
+      box-shadow: 0 0 16px rgba(0, 212, 255, 0.7);
+      transform: translateY(-1px);
     }
 
-    /* Pinch to zoom on-screen HUD */
-    #pinch-hud {
+    /* Cyberdeck UI Control Panel with Frosted Glass */
+    #ui-panel {
       position: absolute;
       top: 48px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 20, 50, 0.9);
-      border: 2px solid #00d4ff;
+      right: 14px;
+      background: rgba(5, 11, 24, 0.85);
+      border: 1.5px solid rgba(0, 240, 255, 0.35);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      z-index: 25;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(0, 240, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      font-size: 9px;
+      max-width: 320px;
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--neon-cyan) rgba(0, 0, 0, 0.3);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .ui-panel-card {
+      background: rgba(2, 6, 18, 0.65);
+      border: 1px solid rgba(0, 212, 255, 0.22);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--neon-cyan);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+    }
+
+    /* Modernized Retro Buttons with Glow & Bevel */
+    button.retro-btn {
+      background: linear-gradient(180deg, rgba(0, 40, 80, 0.85) 0%, rgba(0, 20, 50, 0.95) 100%);
+      border: 1px solid rgba(0, 212, 255, 0.45);
+      border-radius: 5px;
+      color: #e0f2fe;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 7.5px;
+      padding: 6px 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      outline: none;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      flex: 1 1 auto;
+      text-align: center;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    button.retro-btn:hover {
+      background: linear-gradient(180deg, #0055aa 0%, #003377 100%);
+      border-color: #00ffff;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+      transform: translateY(-1px);
+    }
+
+    button.retro-btn.active {
+      background: linear-gradient(180deg, #0088cc 0%, #004488 100%);
+      border-color: #ffd700;
       color: #ffff00;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 10px;
-      padding: 7px 14px;
+      box-shadow: 0 0 14px rgba(255, 215, 0, 0.6);
+    }
+
+    /* Chip buttons for quick selection */
+    .chip-btn {
+      font-family: 'Orbitron', monospace;
+      font-size: 7px;
+      padding: 4px 6px;
       border-radius: 4px;
-      z-index: 27;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.25s ease;
-      box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
-      text-shadow: 1px 1px 0 #000;
-      white-space: nowrap;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chip-btn:hover {
+      border-color: var(--neon-cyan);
+      color: #fff;
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+    }
+    .chip-btn.active {
+      background: rgba(0, 100, 180, 0.4);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
-    #pinch-hud.visible {
-      opacity: 1;
+    /* Spectacular Start Screen Overlay */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(12, 18, 40, 0.94) 0%, rgba(2, 4, 10, 0.98) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      cursor: pointer;
+      text-align: center;
+      padding: 24px;
     }
 
-    @keyframes pulse {
-      0% { opacity: 0.5; }
-      100% { opacity: 1; }
+    .amiga-hero-boing {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 18px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(#ff1122 0deg 22.5deg, #f8f8f8 22.5deg 45deg);
+      box-shadow: 0 0 35px rgba(255, 0, 60, 0.6), inset -12px -12px 20px rgba(0,0,0,0.65), inset 8px 8px 15px rgba(255,255,255,0.7);
+      animation: heroBoingBounce 2.4s ease-in-out infinite;
+      transform-style: preserve-3d;
     }
 
-    /* Bottom Scroller */
+    @keyframes heroBoingBounce {
+      0%, 100% { transform: translateY(-8px) rotate(-15deg); }
+      50% { transform: translateY(8px) rotate(15deg); }
+    }
+
+    .title-amiga {
+      font-family: 'Orbitron', monospace;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #ffffff;
+      text-shadow: 0 0 25px rgba(0, 212, 255, 0.8), 0 0 50px rgba(255, 0, 119, 0.6), 3px 3px 0 #0055ff, -2px -2px 0 #ff0055;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .subtitle-geert {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 5px;
+      background: linear-gradient(135deg, #ffffff 0%, #ffd700 45%, #ff8800 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.85));
+      margin-bottom: 22px;
+      animation: floatText 2.5s ease-in-out infinite alternate;
+    }
+
+    .spec-badges-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 640px;
+      margin-bottom: 28px;
+    }
+    .spec-badge {
+      font-family: 'Orbitron', monospace;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 8px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 4px;
+      color: #94a3b8;
+    }
+
+    .click-prompt {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #00ffff;
+      border: 1.5px solid var(--neon-cyan);
+      padding: 12px 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 100, 200, 0.25) 100%);
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.3);
+      animation: pulsePrompt 1.4s infinite alternate;
+    }
+
+    @keyframes pulsePrompt {
+      0% { transform: scale(0.97); box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); }
+      100% { transform: scale(1.03); box-shadow: 0 0 30px rgba(0, 255, 255, 0.8); }
+    }
+
+    /* Sine Scroller Bar with Gradient Chrome Reflection */
     #scroller-container {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 52px;
-      background: rgba(0, 0, 30, 0.88);
-      border-top: 2px solid #00aaff;
-      border-bottom: 2px solid #ff00aa;
+      background: linear-gradient(180deg, rgba(6, 12, 28, 0.82) 0%, rgba(2, 4, 12, 0.95) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1.5px solid rgba(0, 212, 255, 0.5);
+      border-bottom: 1.5px solid rgba(255, 0, 119, 0.5);
       z-index: 20;
       overflow: hidden;
       display: flex;
       align-items: center;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.7);
     }
+
 
     #scroller-canvas {
       width: 100%;
@@ -389,68 +649,134 @@
 </head>
 <body>
 
-  <!-- Start Splash Screen for Audio Autoplay Policy -->
+    <!-- Start Splash Screen for Audio Autoplay Policy -->
   <div id="start-screen" onclick="startDemo()">
+    <div class="amiga-hero-boing"></div>
     <div class="title-amiga">COMMODORE AMIGA 1200</div>
     <div class="subtitle-geert">★ GEERT VERHULST ★</div>
-    <div style="font-size: 11px; color: #aaa; margin-bottom: 20px; line-height: 1.6;">
-      AGA CHIPSET • 68020 14MHz • 24-BIT COPPER • PAULA CHIPTUNE
+    <div class="spec-badges-row">
+      <span class="spec-badge">⚡ 68020 14MHz</span>
+      <span class="spec-badge">🌈 24-BIT AGA COPPER</span>
+      <span class="spec-badge">🎵 PAULA 4-CH STEREO</span>
+      <span class="spec-badge">🌌 7x SPECIAL SHADERS</span>
+      <span class="spec-badge">🎮 PS5 VULKAN RUNTIME</span>
     </div>
     <div class="click-prompt">► KLIK HIER OM DE DEMO TE STARTEN ◄</div>
   </div>
 
-  <!-- Amiga Top Bar -->
+    <!-- Amiga Top Bar with Glassmorphism & Rainbow LED -->
   <div id="amiga-bar">
     <div class="amiga-badge">
-      <span class="amiga-tick"></span>
-      <span>AMIGA 1200 AGA</span>
+      <span class="amiga-rainbow-tick"></span>
+      <span style="font-family:'Orbitron',sans-serif; color:#fff; font-size:9.5px; letter-spacing:1.5px;">AMIGA 1200 AGA</span>
     </div>
-    <div id="amiga-title-text" style="color: #ffd700;">★ GEERT VERHULST DEMO ★</div>
+    <div id="amiga-title-text">★ GEERT VERHULST DEMO ★</div>
     <div style="display: flex; align-items: center; gap: 6px;">
-      <div id="fps-meter">60 FPS</div>
-      <button id="btn-auto-tour" class="retro-btn active" style="background:#005522; border-color:#00ff88; color:#aaffcc; font-size:7px; padding:3px 5px;" onclick="toggleAutoDirector()" title="Automatische Showreel Wisselaar">🎬 AUTO: AAN</button>
-      <a href="eboot.bin" download="eboot.bin" style="color: #38bdf8; text-decoration: none; font-size: 7.5px; border: 1px solid #0284c7; padding: 3px 5px; border-radius: 2px; background: rgba(0,40,80,0.6);" title="Download Native PS5 eboot.bin">🎮 PS5 EBOOT</a>
-      <a href="amiga-superfx.html" style="color: #00ffcc; text-decoration: none; font-size: 7.5px; border: 1px solid #00aa88; padding: 3px 5px; border-radius: 2px; background: rgba(0,40,30,0.5);" title="Amiga SuperFX Studio">⚡ SUPERFX STUDIO</a>
+      <div id="fps-meter" style="font-family:'Orbitron',monospace; font-weight:700;">60 FPS</div>
+      <div class="top-eq-bar active" id="top-bar-eq" title="Paula Chiptune Audio Activity">
+        <span class="eq-b"></span>
+        <span class="eq-b"></span>
+        <span class="eq-b"></span>
+        <span class="eq-b"></span>
+        <span class="eq-b"></span>
+      </div>
+      <button id="btn-auto-tour" class="retro-btn active" style="background:#005522; border-color:#00ff88; color:#aaffcc; font-size:7px; padding:4px 6px;" onclick="toggleAutoDirector()" title="Automatische Showreel Wisselaar">🎬 AUTO: AAN</button>
+      <a href="eboot.bin" download="eboot.bin" class="pill-btn" style="color: #38bdf8; border: 1px solid #0284c7; background: rgba(0,40,80,0.6);" title="Download Native PS5 eboot.bin">🎮 PS5</a>
+      <a href="amiga-superfx.html" class="pill-btn" style="color: #00ffcc; border: 1px solid #00aa88; background: rgba(0,40,30,0.5);" title="Amiga SuperFX Studio">⚡ SUPERFX</a>
       <button id="ui-toggle-btn" onclick="toggleUIPanel()">⚙ BESTURING</button>
     </div>
   </div>
 
-  <!-- UI Control Panel -->
+    <!-- Cyberdeck UI Control Panel -->
   <div id="ui-panel">
     <div class="ui-panel-header">
-      <div class="ui-header" style="margin-bottom:0;">DEMO BESTURING</div>
+      <div style="font-family:'Orbitron',sans-serif; font-size:9.5px; font-weight:800; color:#ffd700; letter-spacing:1px;">DEMO BESTURING</div>
       <button class="close-btn" onclick="toggleUIPanel()" title="Sluiten">✕ SLUIT</button>
     </div>
 
-    
-    <!-- Special / Experimental Background Controls (from superduperFX) -->
-    <div style="background: rgba(0,0,0,0.55); border: 1px solid #a855f7; border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 4px; margin-top: 3px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 8px;">
-        <span style="color: #d8b4fe;">🌌 ACHTERGROND FX:</span>
-        <button id="btn-bg-auto" class="retro-btn active" style="padding: 2px 6px; font-size: 7px; background:#4c1d95; border-color:#a855f7; color:#f3e8ff;" onclick="toggleAutoBg()">AUTO: AAN</button>
+    <!-- CARD 1: Showreel Auto-Director -->
+    <div class="ui-panel-card">
+      <div class="card-header-label">
+        <span>🎬 SHOWREEL AUTO-TOUR:</span>
+        <button id="btn-tour-toggle" class="retro-btn active" style="padding: 2px 7px; font-size: 7px; background:#005522; border-color:#00ff88; color:#aaffcc;" onclick="toggleAutoDirector()">AAN</button>
       </div>
-      <div id="bg-active-title" style="color: #38bdf8; font-size: 7.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold;">
-        GEOMETRIC LATTICE
+      <div id="tour-scene-title" style="font-family:'Orbitron',monospace; font-weight:700; color: #00ffff; font-size: 7.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        SCÈNE 1/4: HERO GOLF
       </div>
-      <div class="btn-row" style="margin-top: 2px;">
-        <button class="retro-btn" style="padding: 4px 6px; flex: 1;" onclick="prevBgEffect()">◀ VORIGE BG</button>
-        <button class="retro-btn" style="padding: 4px 6px; flex: 1;" onclick="nextBgEffect()">VOLGENDE BG ▶</button>
+      <div style="width: 100%; height: 5px; background: rgba(0, 17, 51, 0.8); border-radius: 3px; overflow: hidden; border: 1px solid rgba(0, 212, 255, 0.3);">
+        <div id="tour-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00d4ff, #ff00aa, #ffd700); box-shadow: 0 0 8px #00d4ff; transition: width 0.2s linear;"></div>
       </div>
     </div>
 
-    <!-- Auto-Director Status & Progress Strip -->
-    <div style="background: rgba(0,0,0,0.55); border: 1px solid #0088ff; border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 4px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 8px;">
-        <span style="color: #ffd700;">🎬 EFFECTEN-WISSELAAR:</span>
-        <button id="btn-tour-toggle" class="retro-btn active" style="padding: 2px 6px; font-size: 7px; background:#005522; border-color:#00ff88; color:#aaffcc;" onclick="toggleAutoDirector()">AAN</button>
+    <!-- CARD 2: Special / Experimental Backgrounds from superduperFX -->
+    <div class="ui-panel-card" style="border-color: rgba(168, 85, 247, 0.4);">
+      <div class="card-header-label" style="color: #d8b4fe;">
+        <span>🌌 ACHTERGROND FX:</span>
+        <button id="btn-bg-auto" class="retro-btn active" style="padding: 2px 6px; font-size: 7px; background:#4c1d95; border-color:#a855f7; color:#f3e8ff;" onclick="toggleAutoBg()">AUTO: AAN</button>
       </div>
-      <div id="tour-scene-title" style="color: #00ffff; font-size: 7.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-        SCÈNE 1/4: HERO GOLF
+      <div id="bg-active-title" style="font-family:'Orbitron',monospace; font-weight:700; color: #38bdf8; font-size: 7.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        GEOMETRIC LATTICE
       </div>
-      <div style="width: 100%; height: 4px; background: #001133; border-radius: 2px; overflow: hidden;">
-        <div id="tour-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00d4ff, #ff00aa); transition: width 0.2s linear;"></div>
+      <div class="btn-row">
+        <button class="retro-btn" style="padding: 4px 6px; flex: 1;" onclick="prevBgEffect()">◀ VORIGE</button>
+        <button class="retro-btn" style="padding: 4px 6px; flex: 1;" onclick="nextBgEffect()">VOLGENDE ▶</button>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:2px;">
+        <button class="chip-btn" onclick="setBgById('lattice')">💎 LATTICE</button>
+        <button class="chip-btn" onclick="setBgById('mandala')">☸️ MANDALA</button>
+        <button class="chip-btn" onclick="setBgById('chrome')">🪞 CHROME</button>
+        <button class="chip-btn" onclick="setBgById('glsl027')">⚡ GLSL027</button>
+        <button class="chip-btn" onclick="setBgById('drift')">🌊 DRIFT</button>
+        <button class="chip-btn" onclick="setBgById('matrix')">📟 MATRIX</button>
+        <button class="chip-btn" onclick="setBgById('phosphor')">✨ PHOSPHOR</button>
       </div>
     </div>
+
+    <!-- CARD 3: Flight Modes & Audio -->
+    <div class="ui-panel-card">
+      <div class="card-header-label">
+        <span>🎛️ 3D VLUCHT PATROON:</span>
+      </div>
+      <div class="btn-row">
+        <button class="retro-btn active" id="btn-mode-0" onclick="setFlightMode(0)">GOLF</button>
+        <button class="retro-btn" id="btn-mode-1" onclick="setFlightMode(1)">BANNER</button>
+        <button class="retro-btn" id="btn-mode-2" onclick="setFlightMode(2)">ORBIT</button>
+        <button class="retro-btn" id="btn-mode-3" onclick="setFlightMode(3)">VORTEX</button>
+      </div>
+      <div class="btn-row" style="margin-top:2px;">
+        <button id="btn-audio" class="retro-btn audio-btn" style="flex:1;" onclick="toggleAudio()">♪ GELUID: AAN</button>
+        <button id="btn-crt" class="retro-btn active" style="flex:1;" onclick="toggleCRT()">CRT SCANLINES</button>
+      </div>
+    </div>
+
+    <!-- CARD 4: Text Scale & Pinch -->
+    <div class="ui-panel-card">
+      <div class="card-header-label">
+        <span>🔍 SCHAAL (OF PINCH MET VINGERS):</span>
+      </div>
+      <div class="scale-control-box">
+        <button class="retro-btn" style="padding:4px 6px;" onclick="changeTextScale(-0.15)">- KLEINER</button>
+        <span id="text-scale-val">100%</span>
+        <button class="retro-btn" style="padding:4px 6px;" onclick="changeTextScale(0.15)">+ GROTER</button>
+        <button class="retro-btn" style="padding:4px 6px;" onclick="resetTextScale()">RESET</button>
+      </div>
+    </div>
+
+    <!-- CARD 5: PlayStation 5 Native Exports -->
+    <div class="ui-panel-card" style="border-color: rgba(99, 102, 241, 0.45);">
+      <div class="card-header-label" style="color: #a5b4fc;">
+        <span>🎮 PLAYSTATION 5 HOMEBREW:</span>
+      </div>
+      <div class="btn-row" style="flex-direction: column; gap: 4px;">
+        <a href="eboot.bin" download="eboot.bin" class="retro-btn" style="text-decoration:none; background: linear-gradient(135deg, #003087 0%, #001f5c 100%); border-color:#0070d1; color:#fff; display:block; padding:5px 6px; text-align:center; font-size:7.5px;">
+          🎮 DOWNLOAD EBOOT.BIN (PS5 NATIVE)
+        </a>
+        <a href="ps5-geert-demo.zip" download="ps5-geert-demo.zip" class="retro-btn" style="text-decoration:none; background: linear-gradient(135deg, #1e1b4b 0%, #0f0a2a 100%); border-color:#6366f1; color:#c7d2fe; display:block; padding:5px 6px; text-align:center; font-size:7.5px;">
+          📦 DOWNLOAD PS5 APP PAKKET (.ZIP)
+        </a>
+      </div>
+    </div>
+  </div>
     <button id="btn-audio" class="retro-btn audio-btn" onclick="toggleAudio()">♪ GELUID: AAN</button>
 
     <div style="font-size:8px; color:#38bdf8; margin-top:3px; text-shadow: 0 0 4px #0284c7;">PLAYSTATION 5 HOMEBREW DOWNLOADS:</div>
@@ -766,6 +1092,7 @@
       createUndulatingFloor();
       createAmigaBoingBall();
       createFlyingLetters();
+      initSparkles();
 
       window.addEventListener('resize', onWindowResize);
 
@@ -1253,6 +1580,9 @@
     function prevBgEffect() {
       if (window.bgEngine) window.bgEngine.prev();
     }
+    function setBgById(id) {
+      if (window.bgEngine) window.bgEngine.setEffectById(id);
+    }
 
     function toggleAutoDirector() {
       autoDirectorActive = !autoDirectorActive;
@@ -1595,6 +1925,84 @@
     let targetCamX = 0, targetCamY = 5, targetCamZ = 28;
     let isMouseDown = false;
 
+    
+    // -------------------------------------------------------------
+    // INTERACTIVE STARDUST SPARKLE TRAIL
+    // -------------------------------------------------------------
+    let sparklesGeo, sparklesMat, sparklesPoints;
+    const SPARKLE_COUNT = 120;
+    const sparklePositions = new Float32Array(SPARKLE_COUNT * 3);
+    const sparkleColors = new Float32Array(SPARKLE_COUNT * 3);
+    const sparkleAlphas = new Float32Array(SPARKLE_COUNT);
+    let sparkleIdx = 0;
+
+    function initSparkles() {
+      sparklesGeo = new THREE.BufferGeometry();
+      for (let i = 0; i < SPARKLE_COUNT; i++) {
+        sparklePositions[i * 3 + 0] = 9999;
+        sparklePositions[i * 3 + 1] = 9999;
+        sparklePositions[i * 3 + 2] = 9999;
+        sparkleColors[i * 3 + 0] = 0;
+        sparkleColors[i * 3 + 1] = 1;
+        sparkleColors[i * 3 + 2] = 1;
+        sparkleAlphas[i] = 0;
+      }
+      sparklesGeo.setAttribute('position', new THREE.BufferAttribute(sparklePositions, 3));
+      sparklesGeo.setAttribute('color', new THREE.BufferAttribute(sparkleColors, 3));
+
+      sparklesMat = new THREE.PointsMaterial({
+        size: 1.8,
+        vertexColors: true,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      sparklesPoints = new THREE.Points(sparklesGeo, sparklesMat);
+      scene.add(sparklesPoints);
+
+      window.addEventListener('pointermove', (e) => {
+        if (!camera) return;
+        const vec = new THREE.Vector3((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0.5);
+        vec.unproject(camera);
+        const dir = vec.sub(camera.position).normalize();
+        const dist = 14;
+        const pos = camera.position.clone().add(dir.multiplyScalar(dist));
+
+        for (let k = 0; k < 2; k++) {
+          const idx = sparkleIdx % SPARKLE_COUNT;
+          sparklePositions[idx * 3 + 0] = pos.x + (Math.random() - 0.5) * 0.8;
+          sparklePositions[idx * 3 + 1] = pos.y + (Math.random() - 0.5) * 0.8;
+          sparklePositions[idx * 3 + 2] = pos.z + (Math.random() - 0.5) * 0.8;
+
+          const hueChoice = Math.random();
+          if (hueChoice < 0.35) {
+            sparkleColors[idx * 3 + 0] = 0.0; sparkleColors[idx * 3 + 1] = 1.0; sparkleColors[idx * 3 + 2] = 1.0;
+          } else if (hueChoice < 0.7) {
+            sparkleColors[idx * 3 + 0] = 1.0; sparkleColors[idx * 3 + 1] = 0.0; sparkleColors[idx * 3 + 2] = 0.6;
+          } else {
+            sparkleColors[idx * 3 + 0] = 1.0; sparkleColors[idx * 3 + 1] = 0.85; sparkleColors[idx * 3 + 2] = 0.0;
+          }
+          sparkleAlphas[idx] = 1.0;
+          sparkleIdx++;
+        }
+      });
+    }
+
+    function updateSparkles() {
+      if (!sparklesPoints) return;
+      const pos = sparklesPoints.geometry.attributes.position.array;
+      for (let i = 0; i < SPARKLE_COUNT; i++) {
+        if (sparkleAlphas[i] > 0) {
+          sparkleAlphas[i] -= 0.025;
+          pos[i * 3 + 1] -= 0.04;
+          if (sparkleAlphas[i] <= 0) {
+            pos[i * 3 + 0] = 9999;
+          }
+        }
+      }
+      sparklesPoints.geometry.attributes.position.needsUpdate = true;
+    }
+
     function setupTouchAndMouseControls() {
       // Touch pinch & pan controls voor mobiel (GSM)
       let initialPinchDistance = 0;
@@ -1754,6 +2162,7 @@
       checkModeCycle(time);
       updateCamera(time);
       updateSineScroller(time);
+      updateSparkles();
 
       renderer.render(scene, camera);
     }

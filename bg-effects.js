@@ -466,24 +466,27 @@
       const h = this.ctxCanvas.height;
 
       if (id === 'lattice') {
-        // Geometric Lattice (Yukiloz7 Three.js wireframe rings reproduction)
-        ctx.fillStyle = 'rgba(5, 7, 12, 0.45)';
+        // Geometric Lattice (Yukiloz7 Three.js wireframe rings with connected hyper-lattice depth)
+        ctx.fillStyle = 'rgba(3, 5, 12, 0.42)';
         ctx.fillRect(0, 0, w, h);
 
         const cx = w / 2;
         const cy = h / 2;
-        const numRings = 16;
+        const numRings = 18;
         const maxR = Math.min(w, h) * 0.48;
 
         ctx.save();
         ctx.translate(cx, cy);
 
+        let prevPoints = [];
+
         for (let i = 0; i < numRings; i++) {
           const r = (i + 1) * (maxR / numRings);
-          const sides = 5 + (i % 4);
-          const rot = time * (0.15 + i * 0.03) * ((i % 2 === 0) ? 1 : -1);
-          const alpha = 0.35 + 0.45 * Math.sin(time * 2.0 + i * 0.4);
+          const sides = 6;
+          const rot = time * (0.12 + i * 0.025) * ((i % 2 === 0) ? 1 : -1);
+          const alpha = 0.35 + 0.5 * Math.sin(time * 2.2 + i * 0.35);
 
+          const currentPoints = [];
           ctx.save();
           ctx.rotate(rot);
           ctx.beginPath();
@@ -491,54 +494,79 @@
             const angle = (s / sides) * Math.PI * 2;
             const px = Math.cos(angle) * r;
             const py = Math.sin(angle) * r;
+            currentPoints.push({ x: px, y: py });
             if (s === 0) ctx.moveTo(px, py);
             else ctx.lineTo(px, py);
           }
-          ctx.strokeStyle = (i % 2 === 0) ? `rgba(0, 255, 204, ${alpha})` : `rgba(236, 72, 153, ${alpha * 0.8})`;
-          ctx.lineWidth = 1.4;
-          ctx.shadowBlur = 10;
+          ctx.strokeStyle = (i % 2 === 0) ? `rgba(0, 255, 204, ${alpha})` : `rgba(236, 72, 153, ${alpha * 0.85})`;
+          ctx.lineWidth = 1.6;
+          ctx.shadowBlur = 14;
           ctx.shadowColor = (i % 2 === 0) ? '#00ffcc' : '#ec4899';
           ctx.stroke();
+
+          // Connect concentric vertex struts for 3D crystal depth
+          if (i % 3 === 0 && prevPoints.length > 0) {
+            ctx.beginPath();
+            for (let s = 0; s < sides; s += 2) {
+              ctx.moveTo(currentPoints[s].x, currentPoints[s].y);
+              ctx.lineTo(prevPoints[s].x, prevPoints[s].y);
+            }
+            ctx.strokeStyle = `rgba(168, 85, 247, ${alpha * 0.4})`;
+            ctx.lineWidth = 1.0;
+            ctx.stroke();
+          }
           ctx.restore();
+
+          prevPoints = currentPoints;
         }
         ctx.restore();
 
       } else if (id === 'matrix') {
-        // ASCII Art Matrix Real-Time Stream
-        ctx.fillStyle = 'rgba(2, 6, 23, 0.18)';
+        // ASCII Art Matrix Real-Time Stream (Vibrant Cyber Rain with Glowing Heads)
+        ctx.fillStyle = 'rgba(2, 5, 18, 0.2)';
         ctx.fillRect(0, 0, w, h);
 
-        ctx.font = '12px monospace';
+        ctx.font = 'bold 13px monospace';
         for (let i = 0; i < this.matrixCols.length; i++) {
           const col = this.matrixCols[i];
           const char = col.chars[Math.floor(Math.random() * col.chars.length)];
 
-          ctx.fillStyle = '#00ff66';
-          ctx.shadowBlur = 8;
-          ctx.shadowColor = '#00ff66';
+          // Glowing leading head character in bright white/cyan
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = '#00ffff';
           ctx.fillText(char, col.x, col.y);
 
+          // Subtle green trail character just above
+          if (col.y > 18) {
+            const trailChar = col.chars[(i * 3) % col.chars.length];
+            ctx.fillStyle = '#00ff66';
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = '#00ff66';
+            ctx.fillText(trailChar, col.x, col.y - 14);
+          }
+
           col.y += col.speed;
-          if (col.y > h) {
-            col.y = Math.random() * -100;
-            col.speed = 2 + Math.random() * 5;
+          if (col.y > h + 30) {
+            col.y = Math.random() * -120;
+            col.speed = 2.5 + Math.random() * 5.5;
           }
         }
         ctx.shadowBlur = 0;
 
       } else if (id === 'phosphor') {
-        // Phosphorescence Bioluminescent Particle Stream
-        ctx.fillStyle = 'rgba(2, 6, 18, 0.22)';
+        // Phosphorescence Bioluminescent Particle Stream (Glowing Stardust Nevel)
+        ctx.fillStyle = 'rgba(2, 5, 16, 0.22)';
         ctx.fillRect(0, 0, w, h);
 
         ctx.globalCompositeOperation = 'lighter';
         for (let i = 0; i < this.particles.length; i++) {
           const p = this.particles[i];
 
-          // Curl noise approximation
-          const angle = Math.sin(p.y * 0.005 + time * 0.6) * Math.cos(p.x * 0.005 + time * 0.6) * Math.PI * 2;
-          p.vx += Math.cos(angle) * 0.15;
-          p.vy += Math.sin(angle) * 0.15;
+          // Curl noise vector field flow
+          const angle = Math.sin(p.y * 0.005 + time * 0.7) * Math.cos(p.x * 0.005 + time * 0.7) * Math.PI * 2;
+          p.vx += Math.cos(angle) * 0.18;
+          p.vy += Math.sin(angle) * 0.18;
 
           p.vx *= 0.94;
           p.vy *= 0.94;
@@ -551,11 +579,13 @@
           if (p.y < 0) p.y = h;
           if (p.y > h) p.y = 0;
 
+          // Glowing particle with halo
+          const pulse = 0.8 + 0.4 * Math.sin(time * 3.0 + i);
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${p.hue}, 90%, 65%, 0.65)`;
-          ctx.shadowBlur = 12;
-          ctx.shadowColor = `hsl(${p.hue}, 100%, 70%)`;
+          ctx.arc(p.x, p.y, p.size * pulse, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${p.hue}, 95%, 65%, 0.7)`;
+          ctx.shadowBlur = 14;
+          ctx.shadowColor = `hsl(${p.hue}, 100%, 75%)`;
           ctx.fill();
         }
         ctx.globalCompositeOperation = 'source-over';

@@ -33,3 +33,4 @@ int main(void) {
 __attribute__((destructor)) static void destructor(void) {
     sceUserServiceTerminate();
 }
+

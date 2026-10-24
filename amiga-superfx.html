@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Amiga 1200 AGA SuperFX Studio — 3D WebGL, Paula Audio & Fysica Simulaties</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500;700;900&family=VT323&display=swap');
 
     * {
       box-sizing: border-box;
@@ -481,33 +481,75 @@
         padding: 9px 12px;
       }
     }
+  
+    .amiga-hero-boing {
+      width: 68px;
+      height: 68px;
+      margin-bottom: 18px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(#ff1122 0deg 22.5deg, #f8f8f8 22.5deg 45deg);
+      box-shadow: 0 0 35px rgba(255, 0, 60, 0.6), inset -12px -12px 20px rgba(0,0,0,0.65), inset 8px 8px 15px rgba(255,255,255,0.7);
+      animation: heroBoingBounce 2.4s ease-in-out infinite;
+    }
+    @keyframes heroBoingBounce {
+      0%, 100% { transform: translateY(-8px) rotate(-15deg); }
+      50% { transform: translateY(8px) rotate(15deg); }
+    }
+    .amiga-rainbow-tick {
+      width: 12px;
+      height: 14px;
+      background: linear-gradient(180deg, #ff0000 0%, #ff8800 20%, #ffff00 40%, #00cc00 60%, #0088ff 80%, #9900ff 100%);
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(255, 128, 0, 0.8), 0 0 14px rgba(0, 212, 255, 0.5);
+      clip-path: polygon(0 40%, 40% 100%, 100% 0, 45% 75%, 20% 50%);
+    }
+    .pill-btn {
+      text-decoration: none;
+      font-family: 'Orbitron', monospace;
+      font-size: 8px;
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .pill-btn:hover {
+      transform: translateY(-1.5px);
+      box-shadow: 0 4px 15px currentColor;
+    }
+
   </style>
 </head>
 <body>
 
-  <!-- Start Splash Screen for Audio Autoplay Policy -->
+    <!-- Start Splash Screen for Audio Autoplay Policy -->
   <div id="start-screen" onclick="startDemo()">
-    <div class="title-amiga">COMMODORE AMIGA 1200</div>
-    <div class="subtitle-geert">★ GEERT VERHULST ★</div>
-    <div style="font-size: 10px; color: #bbb; margin-bottom: 20px; line-height: 1.6; max-width: 580px;">
-      3D WEBGL DEMO • 3D DEMO • PAULA CHIPTUNE • SPECIAL BACKGROUND FX • VERLET STOF • BOIDS ZWERM
+    <div class="amiga-hero-boing"></div>
+    <div class="title-amiga" style="font-family:'Orbitron',monospace; font-size:26px; font-weight:900; letter-spacing:3px; color:#fff; text-shadow:0 0 25px rgba(0,212,255,0.8), 0 0 45px rgba(255,0,119,0.6);">COMMODORE AMIGA 1200</div>
+    <div class="subtitle-geert" style="font-family:'Orbitron',sans-serif; font-size:20px; font-weight:800; letter-spacing:4px; background:linear-gradient(135deg, #fff 0%, #ffd700 45%, #ff8800 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 16px rgba(255,215,0,0.85)); margin-bottom:20px;">★ GEERT VERHULST SUPERFX ★</div>
+    <div class="spec-badges-row" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:600px; margin-bottom:24px;">
+      <span class="spec-badge" style="font-family:'Orbitron',monospace; font-size:8px; padding:4px 8px; background:rgba(15,23,42,0.6); border:1px solid rgba(0,212,255,0.3); border-radius:4px; color:#94a3b8;">🧵 VERLET STOF FYSICA</span>
+      <span class="spec-badge" style="font-family:'Orbitron',monospace; font-size:8px; padding:4px 8px; background:rgba(15,23,42,0.6); border:1px solid rgba(0,212,255,0.3); border-radius:4px; color:#94a3b8;">🦅 BOIDS ZWERM</span>
+      <span class="spec-badge" style="font-family:'Orbitron',monospace; font-size:8px; padding:4px 8px; background:rgba(15,23,42,0.6); border:1px solid rgba(0,212,255,0.3); border-radius:4px; color:#94a3b8;">🎵 PAULA CHIPTUNE</span>
+      <span class="spec-badge" style="font-family:'Orbitron',monospace; font-size:8px; padding:4px 8px; background:rgba(15,23,42,0.6); border:1px solid rgba(0,212,255,0.3); border-radius:4px; color:#94a3b8;">🌌 SPECIAL SHADERS</span>
     </div>
-    <div class="click-prompt">► KLIK HIER OM DE SUPER DEMO TE STARTEN ◄</div>
+    <div class="click-prompt" style="font-family:'Orbitron',monospace; font-size:10px; font-weight:800; letter-spacing:2px; color:#00ffff; border:1.5px solid #00ffff; padding:12px 24px; border-radius:8px; background:linear-gradient(135deg, rgba(0,255,255,0.15) 0%, rgba(0,100,200,0.25) 100%); box-shadow:0 0 25px rgba(0,255,255,0.5);">► KLIK HIER OM DE SUPER DEMO TE STARTEN ◄</div>
   </div>
 
-  <!-- Amiga Top Bar -->
+    <!-- Amiga Top Bar with Glassmorphism & Rainbow LED -->
   <div id="amiga-bar">
     <div class="amiga-badge">
-      <span class="amiga-tick"></span>
-      <span>GEERT VERHULST</span>
+      <span class="amiga-rainbow-tick"></span>
+      <span style="font-family:'Orbitron',sans-serif; color:#fff; font-size:9.5px; letter-spacing:1.5px;">AMIGA 1200 AGA</span>
     </div>
-    <div id="amiga-title-text" style="color: #ffd700;">★ GEERT VERHULST — SUPERFX ★</div>
-    <div class="top-actions">
-      <div id="fps-meter">60 FPS</div>
-      <button id="btn-auto-tour" class="retro-btn active" style="background:#005522; border-color:#00ff88; color:#aaffcc; font-size:7px; padding:3px 5px;" onclick="toggleAutoDirector()" title="Automatische Showreel Wisselaar">🎬 AUTO: AAN</button>
-      <a href="eboot.bin" download="eboot.bin" style="color: #38bdf8; text-decoration: none; font-size: 7.5px; border: 1px solid #0284c7; padding: 3px 5px; border-radius: 2px; background: rgba(0,40,80,0.6);" title="Download Native PS5 eboot.bin">🎮 PS5 EBOOT</a>
-      <a href="index.html" style="color: #00d4ff; text-decoration: none; font-size: 7.5px; border: 1px solid #0055aa; padding: 3px 5px; border-radius: 2px; background: rgba(0,0,50,0.5);">CLASSIC</a>
-      
+    <div id="amiga-title-text" style="font-family:'Orbitron',sans-serif; font-weight:800; letter-spacing:2px; background:linear-gradient(90deg, #fff 0%, #ffd700 50%, #ff8800 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 10px rgba(255,215,0,0.6));">★ GEERT VERHULST — SUPERFX ★</div>
+    <div class="top-actions" style="display:flex; align-items:center; gap:6px;">
+      <div id="fps-meter" style="font-family:'Orbitron',monospace; font-weight:700;">60 FPS</div>
+      <button id="btn-auto-tour" class="retro-btn active" style="background:#005522; border-color:#00ff88; color:#aaffcc; font-size:7px; padding:4px 6px;" onclick="toggleAutoDirector()" title="Automatische Showreel Wisselaar">🎬 AUTO: AAN</button>
+      <a href="eboot.bin" download="eboot.bin" class="pill-btn" style="color: #38bdf8; border: 1px solid #0284c7; background: rgba(0,40,80,0.6);" title="Download Native PS5 eboot.bin">🎮 PS5</a>
+      <a href="index.html" class="pill-btn" style="color: #00d4ff; border: 1px solid #0055aa; background: rgba(0,0,50,0.5);">CLASSIC</a>
       <button id="ui-toggle-btn" onclick="toggleUIPanel()">⚙ FX MENU</button>
     </div>
   </div>
@@ -1828,6 +1870,84 @@
     let mouseX = 0, mouseY = 0;
     let targetCamX = 0, targetCamY = 4, targetCamZ = 28;
 
+    
+    // -------------------------------------------------------------
+    // INTERACTIVE STARDUST SPARKLE TRAIL
+    // -------------------------------------------------------------
+    let sparklesGeo, sparklesMat, sparklesPoints;
+    const SPARKLE_COUNT = 120;
+    const sparklePositions = new Float32Array(SPARKLE_COUNT * 3);
+    const sparkleColors = new Float32Array(SPARKLE_COUNT * 3);
+    const sparkleAlphas = new Float32Array(SPARKLE_COUNT);
+    let sparkleIdx = 0;
+
+    function initSparkles() {
+      sparklesGeo = new THREE.BufferGeometry();
+      for (let i = 0; i < SPARKLE_COUNT; i++) {
+        sparklePositions[i * 3 + 0] = 9999;
+        sparklePositions[i * 3 + 1] = 9999;
+        sparklePositions[i * 3 + 2] = 9999;
+        sparkleColors[i * 3 + 0] = 0;
+        sparkleColors[i * 3 + 1] = 1;
+        sparkleColors[i * 3 + 2] = 1;
+        sparkleAlphas[i] = 0;
+      }
+      sparklesGeo.setAttribute('position', new THREE.BufferAttribute(sparklePositions, 3));
+      sparklesGeo.setAttribute('color', new THREE.BufferAttribute(sparkleColors, 3));
+
+      sparklesMat = new THREE.PointsMaterial({
+        size: 1.8,
+        vertexColors: true,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      sparklesPoints = new THREE.Points(sparklesGeo, sparklesMat);
+      scene.add(sparklesPoints);
+
+      window.addEventListener('pointermove', (e) => {
+        // Project 2D screen coordinates into 3D space near camera
+        const vec = new THREE.Vector3((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0.5);
+        vec.unproject(camera);
+        const dir = vec.sub(camera.position).normalize();
+        const dist = 14;
+        const pos = camera.position.clone().add(dir.multiplyScalar(dist));
+
+        for (let k = 0; k < 2; k++) {
+          const idx = sparkleIdx % SPARKLE_COUNT;
+          sparklePositions[idx * 3 + 0] = pos.x + (Math.random() - 0.5) * 0.8;
+          sparklePositions[idx * 3 + 1] = pos.y + (Math.random() - 0.5) * 0.8;
+          sparklePositions[idx * 3 + 2] = pos.z + (Math.random() - 0.5) * 0.8;
+
+          const hueChoice = Math.random();
+          if (hueChoice < 0.35) {
+            sparkleColors[idx * 3 + 0] = 0.0; sparkleColors[idx * 3 + 1] = 1.0; sparkleColors[idx * 3 + 2] = 1.0; // Cyan
+          } else if (hueChoice < 0.7) {
+            sparkleColors[idx * 3 + 0] = 1.0; sparkleColors[idx * 3 + 1] = 0.0; sparkleColors[idx * 3 + 2] = 0.6; // Magenta
+          } else {
+            sparkleColors[idx * 3 + 0] = 1.0; sparkleColors[idx * 3 + 1] = 0.85; sparkleColors[idx * 3 + 2] = 0.0; // Gold
+          }
+          sparkleAlphas[idx] = 1.0;
+          sparkleIdx++;
+        }
+      });
+    }
+
+    function updateSparkles() {
+      if (!sparklesPoints) return;
+      const pos = sparklesPoints.geometry.attributes.position.array;
+      for (let i = 0; i < SPARKLE_COUNT; i++) {
+        if (sparkleAlphas[i] > 0) {
+          sparkleAlphas[i] -= 0.025;
+          pos[i * 3 + 1] -= 0.04; // Gentle drift downward
+          if (sparkleAlphas[i] <= 0) {
+            pos[i * 3 + 0] = 9999;
+          }
+        }
+      }
+      sparklesPoints.geometry.attributes.position.needsUpdate = true;
+    }
+
     function setupTouchAndMouseControls() {
       let initialPinchDist = 0;
       let startPinchScale = 1.0;
@@ -2004,6 +2124,7 @@
       updateFlyingLetters(time);
       updateCamera(time);
       updateSineScroller(time);
+      updateSparkles();
       updateAutoDirector(time);
 
       renderer.render(scene, camera);
