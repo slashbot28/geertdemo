@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Amiga 1200 AGA WebGL Demo - GURU-EMULATION</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      font-family: 'Press Start 2P', monospace;
+      color: #fff;
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      touch-action: none;
+    }
+
+    /* Amiga Workbench Top Bar */
+    #amiga-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 32px;
+      background: linear-gradient(180deg, #0055aa 0%, #002b66 100%);
+      border-bottom: 2px solid #55aaff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 11px;
+      color: #fff;
+      text-shadow: 1px 1px #000;
+      z-index: 20;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .amiga-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .amiga-tick {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: #ff4400;
+      box-shadow: 0 0 6px #ff8800;
+      border-radius: 2px;
+      animation: pulse 1.2s infinite alternate;
+    }
+
+    #ui-toggle-btn {
+      background: #003366;
+      border: 2px outset #00d4ff;
+      color: #ffea00;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 3px;
+      box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      outline: none;
+      transition: background 0.15s;
+    }
+
+    #ui-toggle-btn:hover, #ui-toggle-btn:active {
+      background: #0055aa;
+      color: #ffffff;
+    }
+
+    /* Pinch to zoom on-screen HUD */
+    #pinch-hud {
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 20, 50, 0.9);
+      border: 2px solid #00d4ff;
+      color: #ffff00;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      padding: 7px 14px;
+      border-radius: 4px;
+      z-index: 27;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+      text-shadow: 1px 1px 0 #000;
+      white-space: nowrap;
+    }
+
+    #pinch-hud.visible {
+      opacity: 1;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    /* Bottom Scroller */
+    #scroller-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;
+      background: rgba(0, 0, 30, 0.88);
+      border-top: 2px solid #00aaff;
+      border-bottom: 2px solid #ff00aa;
+      z-index: 20;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    #scroller-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Retro CRT Overlay */
+    #crt-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 30;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.28) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 6px 100%;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.7);
+      transition: opacity 0.3s;
+    }
+
+    #crt-overlay.disabled {
+      opacity: 0;
+    }
+
+    /* Control Panel */
+    #ui-panel {
+      position: absolute;
+      top: 42px;
+      right: 14px;
+      background: rgba(10, 15, 35, 0.92);
+      border: 2px solid #00d4ff;
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 25;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.35);
+      font-size: 10px;
+      max-width: 280px;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #ui-panel.hidden {
+      display: none !important;
+    }
+
+    .ui-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+      padding-bottom: 6px;
+      margin-bottom: 2px;
+    }
+
+    .close-btn {
+      background: #440011;
+      border: 1px outset #ff3366;
+      color: #ff99bb;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      padding: 3px 6px;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    .close-btn:hover {
+      background: #770022;
+      color: #fff;
+    }
+
+    .scale-control-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 5px 6px;
+      border: 1px solid #0055aa;
+      border-radius: 4px;
+    }
+
+    #text-scale-val {
+      color: #00ffff;
+      font-size: 9px;
+      min-width: 44px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .ui-header {
+      color: #ffcc00;
+      text-align: center;
+      margin-bottom: 4px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 6px #ffaa00;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    button.retro-btn {
+      background: #002244;
+      border: 2px outset #0088ff;
+      color: #fff;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      padding: 7px 9px;
+      cursor: pointer;
+      text-transform: uppercase;
+      outline: none;
+      transition: all 0.15s;
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    button.retro-btn:hover {
+      background: #004488;
+      border-color: #00d4ff;
+      box-shadow: 0 0 8px #00d4ff;
+    }
+
+    button.retro-btn:active, button.retro-btn.active {
+      border-style: inset;
+      background: #0066cc;
+      color: #ffff00;
+      box-shadow: 0 0 12px #ffff00;
+    }
+
+    .audio-btn {
+      background: #440022 !important;
+      border-color: #ff0077 !important;
+    }
+
+    .audio-btn.playing {
+      background: #880044 !important;
+      color: #00ffff !important;
+      border-color: #00ffff !important;
+      box-shadow: 0 0 10px #ff0077 !important;
+    }
+
+    /* Start Overlay for Audio Click */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.88);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      cursor: pointer;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .title-amiga {
+      font-size: 26px;
+      color: #ff3333;
+      text-shadow: 3px 3px 0 #ffffff, 6px 6px 0 #0055ff, 0 0 20px #ff0055;
+      margin-bottom: 20px;
+      line-height: 1.4;
+      letter-spacing: 2px;
+    }
+
+    .subtitle-geert {
+      font-size: 20px;
+      color: #ffd700;
+      text-shadow: 2px 2px 0 #ff6600, 0 0 15px #ffd700;
+      margin-bottom: 30px;
+      letter-spacing: 3px;
+      animation: floatText 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatText {
+      0% { transform: translateY(-4px) scale(0.98); }
+      100% { transform: translateY(4px) scale(1.02); }
+    }
+
+    .click-prompt {
+      font-size: 12px;
+      color: #00ffff;
+      margin-top: 30px;
+      border: 2px dashed #00ffff;
+      padding: 12px 24px;
+      background: rgba(0, 255, 255, 0.1);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+      animation: blink 0.8s infinite alternate;
+    }
+
+    @keyframes blink {
+      0% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    #fps-meter {
+      font-size: 9px;
+      color: #33ff33;
+      text-shadow: 0 0 4px #33ff33;
+    }
+
+    /* Mobiele optimalisaties (GSM scherm) */
+    @media (max-width: 768px) {
+      #amiga-bar {
+        padding: 0 8px;
+        font-size: 9px;
+      }
+      .amiga-badge span:last-child {
+        display: none;
+      }
+      #amiga-title-text {
+        font-size: 9px;
+        letter-spacing: 0px;
+      }
+      #ui-panel {
+        top: 40px;
+        right: 8px;
+        left: 8px;
+        max-width: none;
+        max-height: calc(100vh - 105px);
+        overflow-y: auto;
+      }
+      .title-amiga {
+        font-size: 17px;
+        letter-spacing: 1px;
+      }
+      .subtitle-geert {
+        font-size: 13px;
+        letter-spacing: 1px;
+      }
+      .click-prompt {
+        font-size: 9px;
+        padding: 10px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Start Splash Screen for Audio Autoplay Policy -->
+  <div id="start-screen" onclick="startDemo()">
+    <div class="title-amiga">COMMODORE AMIGA 1200</div>
+    <div class="subtitle-geert">★ GURU-EMULATION ★</div>
+    <div style="font-size: 11px; color: #aaa; margin-bottom: 20px; line-height: 1.6;">
+      AGA CHIPSET • 68020 14MHz • 24-BIT COPPER • PAULA CHIPTUNE
+    </div>
+    <div class="click-prompt">► KLIK HIER OM DE DEMO TE STARTEN ◄</div>
+  </div>
+
+  <!-- Amiga Top Bar -->
+  <div id="amiga-bar">
+    <div class="amiga-badge">
+      <span class="amiga-tick"></span>
+      <span>AMIGA 1200 AGA</span>
+    </div>
+    <div id="amiga-title-text" style="color: #ffd700;">★ GURU-EMULATION DEMO ★</div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div id="fps-meter">60 FPS</div>
+      <button id="ui-toggle-btn" onclick="toggleUIPanel()">⚙ BESTURING</button>
+    </div>
+  </div>
+
+  <!-- UI Control Panel -->
+  <div id="ui-panel">
+    <div class="ui-panel-header">
+      <div class="ui-header" style="margin-bottom:0;">DEMO BESTURING</div>
+      <button class="close-btn" onclick="toggleUIPanel()" title="Sluiten">✕ SLUIT</button>
+    </div>
+    <button id="btn-audio" class="retro-btn audio-btn" onclick="toggleAudio()">♪ GELUID: AAN</button>
+
+    <div style="font-size:8px; color:#88aaff; margin-top:2px;">TEKST FORMAAT (PINCH OF KNOP):</div>
+    <div class="scale-control-box">
+      <button class="retro-btn" style="padding:5px 6px;" onclick="changeTextScale(-0.15)">- KLEINER</button>
+      <span id="text-scale-val">100%</span>
+      <button class="retro-btn" style="padding:5px 6px;" onclick="changeTextScale(0.15)">+ GROTER</button>
+      <button class="retro-btn" style="padding:5px 6px;" onclick="resetTextScale()">RESET</button>
+    </div>
+
+    <div style="font-size:8px; color:#88aaff; margin-top:2px;">VLUCHT PATROON:</div>
+    <div class="btn-row">
+      <button class="retro-btn active" id="btn-mode-0" onclick="setFlightMode(0)">HERO GOLF</button>
+      <button class="retro-btn" id="btn-mode-1" onclick="setFlightMode(1)">3D BANNER</button>
+      <button class="retro-btn" id="btn-mode-2" onclick="setFlightMode(2)">ORBIT</button>
+      <button class="retro-btn" id="btn-mode-3" onclick="setFlightMode(3)">VORTEX</button>
+    </div>
+    <div style="font-size:8px; color:#88aaff; margin-top:2px;">EFFECTEN:</div>
+    <div class="btn-row">
+      <button id="btn-crt" class="retro-btn active" onclick="toggleCRT()">CRT SCANLINES</button>
+      <button id="btn-cam" class="retro-btn active" onclick="toggleCamMode()">CINEMA CAM</button>
+    </div>
+  </div>
+
+  <!-- Three.js Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Bottom Classic Amiga Sine Scroller -->
+  <div id="scroller-container">
+    <canvas id="scroller-canvas"></canvas>
+  </div>
+
+  <!-- CRT Monitor Overlay -->
+  <div id="crt-overlay"></div>
+
+  <!-- Pinch-to-zoom HUD overlay -->
+  <div id="pinch-hud">🔍 TEKST: 100%</div>
+
+  <!-- Three.js library with CDN fallback -->
+  <script src="three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+
+  <script>
+    /* =====================================================================
+       AMIGA 1200 AGA DEMOSCENE WEBGL EXPERIENCE
+       PRODUCED FOR: GURU-EMULATION
+       ===================================================================== */
+
+    let scene, camera, renderer;
+    let boingBall, ballShadow;
+    let letterMeshes = [];
+    let copperMesh, starfieldPoints;
+    let floorGrid;
+    let clock = new THREE.Clock();
+    let flightMode = 0; // 0: Wave, 1: Orbit, 2: Swarm, 3: Vortex
+    let cinematicCam = true;
+    let crtEnabled = true;
+
+    // Vinger pinch-to-zoom en UI besturing voor mobiel (GSM)
+    let userTextScale = 1.0;
+    let hudTimer = null;
+
+    function toggleUIPanel() {
+      const panel = document.getElementById('ui-panel');
+      if (!panel) return;
+      panel.classList.toggle('hidden');
+    }
+
+    function showPinchHud(msg) {
+      const hud = document.getElementById('pinch-hud');
+      if (!hud) return;
+      hud.innerText = msg;
+      hud.classList.add('visible');
+      clearTimeout(hudTimer);
+      hudTimer = setTimeout(() => {
+        hud.classList.remove('visible');
+      }, 1400);
+    }
+
+    function updateScaleDisplay() {
+      const pct = Math.round(userTextScale * 100);
+      const valEl = document.getElementById('text-scale-val');
+      if (valEl) valEl.innerText = `${pct}%`;
+      showPinchHud(`🔍 TEKST: ${pct}%`);
+    }
+
+    function changeTextScale(delta) {
+      userTextScale = Math.max(0.35, Math.min(2.5, userTextScale + delta));
+      updateScaleDisplay();
+    }
+
+    function resetTextScale() {
+      userTextScale = 1.0;
+      updateScaleDisplay();
+    }
+
+    function checkInitialUIVisibility() {
+      const panel = document.getElementById('ui-panel');
+      if (panel && window.innerWidth <= 768) {
+        panel.classList.add('hidden');
+      }
+    }
+
+    // Word configuration: GEERT (Word 1) and VERHULST (Word 2)
+    const NAME_WORD_1 = "GURU";
+    const NAME_WORD_2 = "EMULATION";
+    const FULL_TEXT = "GURU-EMULATION";
+
+    // -------------------------------------------------------------
+    // 1. PROCEDURAL 3D VECTOR GLYPHS (G, E, R, T, V, H, U, L, S)
+    // -------------------------------------------------------------
+    function createLetterShape(char) {
+      const s = new THREE.Shape();
+      switch (char) {
+        case 'G':
+          s.moveTo(2.4, 3.5);
+          s.lineTo(0.5, 3.5);
+          s.lineTo(0, 3.0);
+          s.lineTo(0, 0.5);
+          s.lineTo(0.5, 0);
+          s.lineTo(2.4, 0);
+          s.lineTo(2.4, 1.8);
+          s.lineTo(1.2, 1.8);
+          s.lineTo(1.2, 1.2);
+          s.lineTo(1.8, 1.2);
+          s.lineTo(1.8, 0.65);
+          s.lineTo(0.65, 0.65);
+          s.lineTo(0.65, 2.85);
+          s.lineTo(2.4, 2.85);
+          s.closePath();
+          break;
+        case 'E':
+          s.moveTo(0, 0);
+          s.lineTo(0, 3.5);
+          s.lineTo(2.3, 3.5);
+          s.lineTo(2.3, 2.85);
+          s.lineTo(0.65, 2.85);
+          s.lineTo(0.65, 2.1);
+          s.lineTo(1.9, 2.1);
+          s.lineTo(1.9, 1.45);
+          s.lineTo(0.65, 1.45);
+          s.lineTo(0.65, 0.65);
+          s.lineTo(2.3, 0.65);
+          s.lineTo(2.3, 0);
+          s.closePath();
+          break;
+        case 'R':
+          s.moveTo(0, 0);
+          s.lineTo(0, 3.5);
+          s.lineTo(2.3, 3.5);
+          s.lineTo(2.3, 1.7);
+          s.lineTo(1.4, 1.7);
+          s.lineTo(2.3, 0);
+          s.lineTo(1.5, 0);
+          s.lineTo(0.85, 1.35);
+          s.lineTo(0.65, 1.35);
+          s.lineTo(0.65, 0);
+          s.closePath();
+          // Loop hole
+          const rHole = new THREE.Path();
+          rHole.moveTo(0.65, 2.05);
+          rHole.lineTo(1.65, 2.05);
+          rHole.lineTo(1.65, 2.85);
+          rHole.lineTo(0.65, 2.85);
+          rHole.closePath();
+          s.holes.push(rHole);
+          break;
+        case 'T':
+          s.moveTo(0.85, 0);
+          s.lineTo(0.85, 2.85);
+          s.lineTo(0, 2.85);
+          s.lineTo(0, 3.5);
+          s.lineTo(2.3, 3.5);
+          s.lineTo(2.3, 2.85);
+          s.lineTo(1.45, 2.85);
+          s.lineTo(1.45, 0);
+          s.closePath();
+          break;
+        case 'V':
+          s.moveTo(0, 3.5);
+          s.lineTo(0.65, 3.5);
+          s.lineTo(1.15, 1.0);
+          s.lineTo(1.65, 3.5);
+          s.lineTo(2.3, 3.5);
+          s.lineTo(1.5, 0);
+          s.lineTo(0.8, 0);
+          s.closePath();
+          break;
+        case 'H':
+          s.moveTo(0, 0);
+          s.lineTo(0, 3.5);
+          s.lineTo(0.65, 3.5);
+          s.lineTo(0.65, 2.1);
+          s.lineTo(1.65, 2.1);
+          s.lineTo(1.65, 3.5);
+          s.lineTo(2.3, 3.5);
+          s.lineTo(2.3, 0);
+          s.lineTo(1.65, 0);
+          s.lineTo(1.65, 1.4);
+          s.lineTo(0.65, 1.4);
+          s.lineTo(0.65, 0);
+          s.closePath();
+          break;
+        case 'U':
+          s.moveTo(0, 3.5);
+          s.lineTo(0.65, 3.5);
+          s.lineTo(0.65, 0.7);
+          s.lineTo(1.65, 0.7);
+          s.lineTo(1.65, 3.5);
+          s.lineTo(2.3, 3.5);
+          s.lineTo(2.3, 0.5);
+          s.lineTo(1.8, 0);
+          s.lineTo(0.5, 0);
+          s.lineTo(0, 0.5);
+          s.closePath();
+          break;
+        case 'L':
+          s.moveTo(0, 0);
+          s.lineTo(0, 3.5);
+          s.lineTo(0.65, 3.5);
+          s.lineTo(0.65, 0.65);
+          s.lineTo(2.3, 0.65);
+          s.lineTo(2.3, 0);
+          s.closePath();
+          break;
+        case 'M':
+          s.moveTo(0, 0);
+          s.lineTo(0, 3.5);
+          s.lineTo(0.65, 3.5);
+          s.lineTo(1.25, 1.3);
+          s.lineTo(1.85, 3.5);
+          s.lineTo(2.5, 3.5);
+          s.lineTo(2.5, 0);
+          s.lineTo(1.85, 0);
+          s.lineTo(1.85, 2.1);
+          s.lineTo(1.25, 0.7);
+          s.lineTo(0.65, 2.1);
+          s.lineTo(0.65, 0);
+          s.closePath();
+          break;
+        case 'A':
+          s.moveTo(0, 0);
+          s.lineTo(0.6, 3.5);
+          s.lineTo(1.8, 3.5);
+          s.lineTo(2.4, 0);
+          s.lineTo(1.75, 0);
+          s.lineTo(1.55, 1.0);
+          s.lineTo(0.85, 1.0);
+          s.lineTo(0.65, 0);
+          s.closePath();
+          const aHole = new THREE.Path();
+          aHole.moveTo(0.9, 1.6);
+          aHole.lineTo(1.5, 1.6);
+          aHole.lineTo(1.2, 2.75);
+          aHole.closePath();
+          s.holes.push(aHole);
+          break;
+        case 'I':
+          s.moveTo(0, 0);
+          s.lineTo(0, 0.65);
+          s.lineTo(0.48, 0.65);
+          s.lineTo(0.48, 2.85);
+          s.lineTo(0, 2.85);
+          s.lineTo(0, 3.5);
+          s.lineTo(1.6, 3.5);
+          s.lineTo(1.6, 2.85);
+          s.lineTo(1.12, 2.85);
+          s.lineTo(1.12, 0.65);
+          s.lineTo(1.6, 0.65);
+          s.lineTo(1.6, 0);
+          s.closePath();
+          break;
+        case 'O':
+          s.moveTo(0.5, 0);
+          s.lineTo(1.9, 0);
+          s.lineTo(2.4, 0.5);
+          s.lineTo(2.4, 3.0);
+          s.lineTo(1.9, 3.5);
+          s.lineTo(0.5, 3.5);
+          s.lineTo(0, 3.0);
+          s.lineTo(0, 0.5);
+          s.closePath();
+          const oHole = new THREE.Path();
+          oHole.moveTo(0.65, 0.65);
+          oHole.lineTo(1.75, 0.65);
+          oHole.lineTo(1.75, 2.85);
+          oHole.lineTo(0.65, 2.85);
+          oHole.closePath();
+          s.holes.push(oHole);
+          break;
+        case 'N':
+          s.moveTo(0, 0);
+          s.lineTo(0, 3.5);
+          s.lineTo(0.65, 3.5);
+          s.lineTo(1.75, 1.1);
+          s.lineTo(1.75, 3.5);
+          s.lineTo(2.4, 3.5);
+          s.lineTo(2.4, 0);
+          s.lineTo(1.75, 0);
+          s.lineTo(0.65, 2.4);
+          s.lineTo(0.65, 0);
+          s.closePath();
+          break;
+        case '-':
+          s.moveTo(0.2, 1.45);
+          s.lineTo(1.5, 1.45);
+          s.lineTo(1.5, 2.05);
+          s.lineTo(0.2, 2.05);
+          s.closePath();
+          break;
+        case 'S':
+          s.moveTo(2.3, 3.5);
+          s.lineTo(0.3, 3.5);
+          s.lineTo(0, 3.2);
+          s.lineTo(0, 1.8);
+          s.lineTo(1.7, 1.8);
+          s.lineTo(1.7, 0.7);
+          s.lineTo(0, 0.7);
+          s.lineTo(0, 0);
+          s.lineTo(2.0, 0);
+          s.lineTo(2.3, 0.3);
+          s.lineTo(2.3, 1.7);
+          s.lineTo(0.65, 1.7);
+          s.lineTo(0.65, 2.85);
+          s.lineTo(2.3, 2.85);
+          s.closePath();
+          break;
+        default:
+          s.moveTo(0, 0);
+          s.lineTo(0, 3.5);
+          s.lineTo(2, 3.5);
+          s.lineTo(2, 0);
+          s.closePath();
+      }
+      return s;
+    }
+
+    // -------------------------------------------------------------
+    // 2. SCENE & RENDERER INITIALIZATION
+    // -------------------------------------------------------------
+    function initScene() {
+      const container = document.getElementById('canvas-container');
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x020015, 0.018);
+
+      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 5, 28);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25;
+      container.appendChild(renderer.domElement);
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0x223355, 1.2);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+      dirLight.position.set(15, 25, 20);
+      scene.add(dirLight);
+
+      // Colorful Amiga style rim/specular point lights
+      const pinkLight = new THREE.PointLight(0xff0088, 3.5, 45);
+      pinkLight.position.set(-15, 8, 10);
+      scene.add(pinkLight);
+
+      const cyanLight = new THREE.PointLight(0x00d4ff, 3.5, 45);
+      cyanLight.position.set(15, 6, 12);
+      scene.add(cyanLight);
+
+      const goldLight = new THREE.PointLight(0xffaa00, 3.0, 35);
+      goldLight.position.set(0, -5, 15);
+      scene.add(goldLight);
+
+      // Build components
+      createStarfield();
+      createCopperBackground();
+      createUndulatingFloor();
+      createAmigaBoingBall();
+      createFlyingLetters();
+
+      window.addEventListener('resize', onWindowResize);
+
+      // Interactive touch pinch & mouse orbit
+      setupTouchAndMouseControls();
+      checkInitialUIVisibility();
+    }
+
+    // -------------------------------------------------------------
+    // 3. AMIGA COPPER BACKGROUND BARS
+    // -------------------------------------------------------------
+    let copperCanvas, copperCtx, copperTexture;
+    function createCopperBackground() {
+      copperCanvas = document.createElement('canvas');
+      copperCanvas.width = 16;
+      copperCanvas.height = 512;
+      copperCtx = copperCanvas.getContext('2d');
+
+      copperTexture = new THREE.CanvasTexture(copperCanvas);
+      copperTexture.minFilter = THREE.LinearFilter;
+      copperTexture.magFilter = THREE.LinearFilter;
+
+      const planeGeo = new THREE.PlaneGeometry(160, 100);
+      const planeMat = new THREE.MeshBasicMaterial({
+        map: copperTexture,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.75
+      });
+      copperMesh = new THREE.Mesh(planeGeo, planeMat);
+      copperMesh.position.set(0, 5, -50);
+      scene.add(copperMesh);
+    }
+
+    function updateCopperBars(time) {
+      if (!copperCtx) return;
+      const h = copperCanvas.height;
+      copperCtx.fillStyle = '#01000a';
+      copperCtx.fillRect(0, 0, 16, h);
+
+      // Draw 6 undulating rainbow gradient copper bars
+      const numBars = 5;
+      for (let b = 0; b < numBars; b++) {
+        const centerY = (h * 0.5) + Math.sin(time * 1.8 + b * 1.1) * (h * 0.35) + Math.cos(time * 0.9 + b * 0.6) * 40;
+        const barHeight = 45 + Math.sin(time * 2.5 + b) * 15;
+
+        const grad = copperCtx.createLinearGradient(0, centerY - barHeight, 0, centerY + barHeight);
+        const hue1 = (time * 40 + b * 55) % 360;
+        const hue2 = (hue1 + 80) % 360;
+        grad.addColorStop(0, 'rgba(0,0,0,0)');
+        grad.addColorStop(0.3, `hsla(${hue1}, 100%, 50%, 0.9)`);
+        grad.addColorStop(0.5, '#ffffff');
+        grad.addColorStop(0.7, `hsla(${hue2}, 100%, 50%, 0.9)`);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+        copperCtx.fillStyle = grad;
+        copperCtx.fillRect(0, Math.max(0, centerY - barHeight), 16, barHeight * 2);
+      }
+      copperTexture.needsUpdate = true;
+    }
+
+    // -------------------------------------------------------------
+    // 4. 3D WARP SPEED STARFIELD
+    // -------------------------------------------------------------
+    let starPositions, starSpeeds;
+    const STAR_COUNT = 900;
+    function createStarfield() {
+      const geo = new THREE.BufferGeometry();
+      starPositions = new Float32Array(STAR_COUNT * 3);
+      starSpeeds = new Float32Array(STAR_COUNT);
+      const starColors = new Float32Array(STAR_COUNT * 3);
+
+      for (let i = 0; i < STAR_COUNT; i++) {
+        starPositions[i * 3 + 0] = (Math.random() - 0.5) * 140;
+        starPositions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+        starPositions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+
+        starSpeeds[i] = 0.4 + Math.random() * 0.8;
+
+        // Amiga palette colors for stars: white, cyan, gold, magenta
+        const colType = Math.random();
+        if (colType < 0.6) {
+          starColors[i * 3 + 0] = 1.0; starColors[i * 3 + 1] = 1.0; starColors[i * 3 + 2] = 1.0;
+        } else if (colType < 0.8) {
+          starColors[i * 3 + 0] = 0.2; starColors[i * 3 + 1] = 0.8; starColors[i * 3 + 2] = 1.0;
+        } else {
+          starColors[i * 3 + 0] = 1.0; starColors[i * 3 + 1] = 0.4; starColors[i * 3 + 2] = 0.9;
+        }
+      }
+
+      geo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+      // Star point texture (soft radial glow)
+      const dotCanvas = document.createElement('canvas');
+      dotCanvas.width = 32;
+      dotCanvas.height = 32;
+      const ctx = dotCanvas.getContext('2d');
+      const rad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+      rad.addColorStop(0, 'rgba(255,255,255,1)');
+      rad.addColorStop(0.3, 'rgba(255,255,255,0.8)');
+      rad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = rad;
+      ctx.fillRect(0, 0, 32, 32);
+
+      const dotTexture = new THREE.CanvasTexture(dotCanvas);
+
+      const mat = new THREE.PointsMaterial({
+        size: 1.4,
+        vertexColors: true,
+        map: dotTexture,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      starfieldPoints = new THREE.Points(geo, mat);
+      scene.add(starfieldPoints);
+    }
+
+    function updateStarfield(delta) {
+      const pos = starfieldPoints.geometry.attributes.position.array;
+      for (let i = 0; i < STAR_COUNT; i++) {
+        pos[i * 3 + 2] += starSpeeds[i] * 38 * delta;
+        if (pos[i * 3 + 2] > 35) {
+          pos[i * 3 + 2] = -65;
+          pos[i * 3 + 0] = (Math.random() - 0.5) * 140;
+          pos[i * 3 + 1] = (Math.random() - 0.5) * 80;
+        }
+      }
+      starfieldPoints.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // -------------------------------------------------------------
+    // 5. UNDULATING 3D NEON GRID FLOOR
+    // -------------------------------------------------------------
+    let floorPositions, origFloorY;
+    const GRID_W = 40, GRID_H = 40;
+    function createUndulatingFloor() {
+      const geo = new THREE.PlaneGeometry(120, 120, GRID_W, GRID_H);
+      geo.rotateX(-Math.PI / 2);
+
+      floorPositions = geo.attributes.position.array;
+      origFloorY = new Float32Array(floorPositions.length);
+      for (let i = 0; i < floorPositions.length; i++) {
+        origFloorY[i] = floorPositions[i];
+      }
+
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x002244,
+        emissive: 0x001133,
+        wireframe: true,
+        roughness: 0.2,
+        metalness: 0.8
+      });
+
+      floorGrid = new THREE.Mesh(geo, mat);
+      floorGrid.position.y = -8;
+      scene.add(floorGrid);
+    }
+
+    function updateFloor(time) {
+      const pos = floorGrid.geometry.attributes.position.array;
+      for (let i = 0; i < pos.length; i += 3) {
+        const x = pos[i];
+        const z = pos[i + 2];
+        pos[i + 1] = Math.sin(x * 0.15 + time * 2.5) * 1.2 + Math.cos(z * 0.15 + time * 2.0) * 1.2;
+      }
+      floorGrid.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // -------------------------------------------------------------
+    // 6. ICONIC AMIGA BOING BALL
+    // -------------------------------------------------------------
+    function createAmigaBoingBall() {
+      // Create classic 8x16 checkered red and white texture
+      const ballCanvas = document.createElement('canvas');
+      ballCanvas.width = 512;
+      ballCanvas.height = 256;
+      const ctx = ballCanvas.getContext('2d');
+
+      const rows = 8;
+      const cols = 16;
+      const rw = ballCanvas.width / cols;
+      const rh = ballCanvas.height / rows;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const isRed = (r + c) % 2 === 0;
+          ctx.fillStyle = isRed ? '#dd0011' : '#f0f0f0';
+          ctx.fillRect(c * rw, r * rh, rw, rh);
+        }
+      }
+
+      const ballTexture = new THREE.CanvasTexture(ballCanvas);
+      ballTexture.magFilter = THREE.NearestFilter; // Classic faceted demoscene look
+
+      const ballGeo = new THREE.SphereGeometry(3.5, 32, 20);
+      const ballMat = new THREE.MeshStandardMaterial({
+        map: ballTexture,
+        roughness: 0.25,
+        metalness: 0.2,
+        bumpMap: ballTexture,
+        bumpScale: 0.04
+      });
+
+      boingBall = new THREE.Mesh(ballGeo, ballMat);
+      scene.add(boingBall);
+
+      // Floor Shadow
+      const shadowGeo = new THREE.PlaneGeometry(8, 8);
+      shadowGeo.rotateX(-Math.PI / 2);
+      const shadowCanvas = document.createElement('canvas');
+      shadowCanvas.width = 64;
+      shadowCanvas.height = 64;
+      const sCtx = shadowCanvas.getContext('2d');
+      const grad = sCtx.createRadialGradient(32, 32, 0, 32, 32, 30);
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0.7)');
+      grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.35)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      sCtx.fillStyle = grad;
+      sCtx.fillRect(0, 0, 64, 64);
+
+      const shadowTex = new THREE.CanvasTexture(shadowCanvas);
+      const shadowMat = new THREE.MeshBasicMaterial({
+        map: shadowTex,
+        transparent: true,
+        depthWrite: false
+      });
+      ballShadow = new THREE.Mesh(shadowGeo, shadowMat);
+      ballShadow.position.y = -7.8;
+      scene.add(ballShadow);
+    }
+
+    function updateBoingBall(time) {
+      const bounceFreq = 2.8;
+      const bounceH = 9.0;
+      const groundY = -4.5;
+
+      // Sinusoidal bounce physics
+      const rawBounce = Math.abs(Math.sin(time * bounceFreq));
+      const posY = groundY + rawBounce * bounceH;
+      const posX = Math.sin(time * 0.7) * 9.0;
+      const posZ = Math.cos(time * 0.5) * 4.0 - 5.0;
+
+      boingBall.position.set(posX, posY, posZ);
+
+      // Squash and stretch at impact
+      let squashY = 1.0;
+      if (rawBounce < 0.15) {
+        squashY = 0.75 + (rawBounce / 0.15) * 0.25;
+      } else {
+        squashY = 1.0 + (rawBounce - 0.5) * 0.15;
+      }
+      const stretchXZ = 1.0 / Math.sqrt(squashY);
+      boingBall.scale.set(stretchXZ, squashY, stretchXZ);
+
+      // Classic 20-degree tilt + Y-rotation
+      boingBall.rotation.z = -0.32;
+      boingBall.rotation.y += 0.045;
+      boingBall.rotation.x = Math.sin(time) * 0.15;
+
+      // Shadow under ball
+      ballShadow.position.x = posX;
+      ballShadow.position.z = posZ;
+      const shadowScale = (1.0 - rawBounce * 0.45) * 1.2;
+      ballShadow.scale.set(shadowScale, shadowScale, shadowScale);
+      ballShadow.material.opacity = 0.75 - rawBounce * 0.4;
+    }
+
+    // -------------------------------------------------------------
+    // 7. 3D FLYING LETTERS: "GEERT VERHULST"
+    // -------------------------------------------------------------
+    function createFlyingLetters() {
+      const extrudeSettings = {
+        depth: 0.75,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        steps: 1,
+        bevelSize: 0.12,
+        bevelThickness: 0.12
+      };
+
+      // Word 1: GEERT (Pure Lustrous Amiga Gold)
+      const goldMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffcc00,
+        metalness: 0.9,
+        roughness: 0.15,
+        emissive: 0x332200
+      });
+
+      // Word 2: VERHULST (Cyber Amiga Cyan/Chrome)
+      const cyanMaterial = new THREE.MeshStandardMaterial({
+        color: 0x00ffff,
+        metalness: 0.9,
+        roughness: 0.15,
+        emissive: 0x002244
+      });
+
+      let letterIndex = 0;
+
+      function addWord(word, mat, wordOffset) {
+        for (let i = 0; i < word.length; i++) {
+          const char = word[i];
+          const shape = createLetterShape(char);
+          const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+          geo.center(); // Center local bounding box
+
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.userData = {
+            char: char,
+            index: letterIndex,
+            wordIndex: i,
+            wordOffset: wordOffset,
+            phase: letterIndex * 0.45,
+            baseScale: 1.0
+          };
+
+          scene.add(mesh);
+          letterMeshes.push(mesh);
+          letterIndex++;
+        }
+      }
+
+      addWord(NAME_WORD_1, goldMaterial, 0);
+      addWord(NAME_WORD_2, cyanMaterial, NAME_WORD_1.length);
+    }
+
+    function updateFlyingLetters(time) {
+      const count = letterMeshes.length;
+
+      // Bereken automatische responsiviteit voor smalle mobiele schermen (GSM portret)
+      const screenAspect = window.innerWidth / Math.max(1, window.innerHeight);
+      const isMobilePortrait = screenAspect < 0.95;
+      const responsiveFactor = isMobilePortrait ? Math.min(0.75, Math.max(0.42, window.innerWidth / 520)) : 1.0;
+      const effectiveScale = userTextScale * responsiveFactor;
+
+      letterMeshes.forEach((mesh) => {
+        const u = mesh.userData;
+        const i = u.index;
+        const isGeert = i < NAME_WORD_1.length;
+        const lineIdx = isGeert ? i : i - NAME_WORD_1.length;
+        const lineLen = isGeert ? NAME_WORD_1.length : NAME_WORD_2.length;
+
+        let tx = 0, ty = 0, tz = 0;
+        let rx = 0, ry = 0, rz = 0;
+        let useLookAtCamera = false;
+
+        switch (flightMode) {
+          case 0: // MODE 0: HERO GOLF (Direct bij opstarten: 100% perfect leesbaar van links naar rechts)
+            // Regel 1 (Boven): G - E - E - R - T (Lustrous Gold)
+            // Regel 2 (Onder): V - E - R - H - U - L - S - T (Cyber Chrome Cyan)
+            const spacing0 = (isGeert ? 3.6 : 2.45) * effectiveScale;
+            tx = (lineIdx - (lineLen - 1) / 2) * spacing0;
+
+            // Vloeiende zachte Amiga demoscene sinusgolf
+            const waveY0 = Math.sin(time * 3.2 + lineIdx * 0.5) * (1.1 * Math.min(1.0, effectiveScale));
+            ty = (isGeert ? 5.2 : 0.8) * Math.max(0.65, effectiveScale) + waveY0;
+            tz = 8.0 + Math.cos(time * 2.2 + lineIdx * 0.45) * 1.6;
+
+            // Letters blijven recht naar voren/kijker gericht met subtiele 3D glinstering
+            rx = Math.sin(time * 2.5 + lineIdx * 0.3) * 0.18;
+            ry = Math.sin(time * 1.8 + lineIdx * 0.25) * 0.12;
+            rz = Math.cos(time * 2.0 + lineIdx * 0.35) * 0.08;
+            break;
+
+          case 1: // MODE 1: 3D BANNER (Golvende vliegende banner, altijd van links naar rechts leesbaar)
+            const bannerOffset = (i - (count - 1) / 2) * (2.2 * effectiveScale);
+            const bannerWander = Math.sin(time * 1.2) * (6.0 * Math.min(1.0, effectiveScale));
+            tx = bannerOffset + bannerWander;
+
+            ty = 3.0 + Math.sin(time * 3.0 + i * 0.38) * 3.5;
+            tz = 6.0 + Math.cos(time * 2.0 + i * 0.3) * 4.0;
+
+            rx = Math.sin(time * 2.5 + i * 0.2) * 0.25;
+            ry = Math.sin(time * 1.6 + i * 0.18) * 0.18;
+            rz = Math.cos(time * 2.0 + i * 0.25) * 0.15;
+            break;
+
+          case 2: // MODE 2: 3D ORBIT CAROUSEL (Rondom de Boing Ball)
+            const angle = time * 1.2 + (i / count) * Math.PI * 2;
+            const radius = (13.0 + Math.sin(time * 1.8 + i * 0.4) * 1.8) * Math.max(0.5, Math.min(1.3, effectiveScale));
+            const tilt = 0.35;
+
+            tx = Math.cos(angle) * radius;
+            tz = Math.sin(angle) * radius;
+            ty = Math.sin(angle) * Math.sin(tilt) * radius + Math.sin(time * 2.8 + i * 0.5) * 1.8 + 2.5;
+
+            // Letters draaien met de voorkant altijd naar de camera gericht!
+            useLookAtCamera = true;
+            break;
+
+          case 3: // MODE 3: 3D VORTEX PULSE
+            const vPhase = (time * 1.5 + (i / count) * Math.PI * 2);
+            const vRad = (8.0 + Math.sin(time * 2.5 + i * 0.3) * 3.5) * Math.max(0.5, Math.min(1.3, effectiveScale));
+            tx = Math.cos(vPhase) * vRad;
+            ty = Math.sin(vPhase) * (vRad * 0.55) + 3.0;
+            tz = 5.0 + Math.cos(time * 2.0 + i * 0.4) * 3.0;
+
+            // Voorkant blijft naar camera gericht
+            useLookAtCamera = true;
+            break;
+        }
+
+        // Vloeiende interpolatie voor positie
+        mesh.position.x += (tx - mesh.position.x) * 0.14;
+        mesh.position.y += (ty - mesh.position.y) * 0.14;
+        mesh.position.z += (tz - mesh.position.z) * 0.14;
+
+        // Vloeiende schaalverandering via vinger-pinch of knoppen
+        mesh.scale.x += (effectiveScale - mesh.scale.x) * 0.2;
+        mesh.scale.y += (effectiveScale - mesh.scale.y) * 0.2;
+        mesh.scale.z += (effectiveScale - mesh.scale.z) * 0.2;
+
+        if (useLookAtCamera) {
+          mesh.lookAt(camera.position);
+        } else {
+          mesh.rotation.x += (rx - mesh.rotation.x) * 0.14;
+          mesh.rotation.y += (ry - mesh.rotation.y) * 0.14;
+          mesh.rotation.z += (rz - mesh.rotation.z) * 0.14;
+        }
+      });
+    }
+
+    // Auto cycle flight modes om de 20 seconden
+    let lastModeSwitch = 0;
+    function checkModeCycle(time) {
+      if (time - lastModeSwitch > 20.0) {
+        lastModeSwitch = time;
+        flightMode = (flightMode + 1) % 4;
+        updateModeButtons();
+      }
+    }
+
+    function setFlightMode(m) {
+      flightMode = m;
+      lastModeSwitch = clock.getElapsedTime();
+      updateModeButtons();
+    }
+
+    function updateModeButtons() {
+      for (let i = 0; i < 4; i++) {
+        const btn = document.getElementById(`btn-mode-${i}`);
+        if (btn) {
+          if (i === flightMode) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 8. AMIGA SINE SCROLLER (2D CANVAS)
+    // -------------------------------------------------------------
+    const scrollCanvas = document.getElementById('scroller-canvas');
+    const scrollCtx = scrollCanvas.getContext('2d');
+    const SCROLL_TEXT = "    +++ WELKOM BIJ DE AMIGA 1200 AGA RETRO DEMO +++ CODE & VORMGEVING: GURU-EMULATION +++ DEMOSCENE FOREVER +++ GROETEN AAN: THE SILENTS, FAIRLIGHT, RED SECTOR, RAZOR 1911, FUTURE CREW, TRSI, KEFRENS, MELON DEZIGN +++ 100% PUUR WEBGL & PAULA CHIPTUNE AUDIO +++ GENIET VAN DE VLIEGENDE 3D LETTERS EN BOING BALL! +++             ";
+    let scrollOffset = 0;
+
+    function resizeScroller() {
+      scrollCanvas.width = window.innerWidth;
+      scrollCanvas.height = 52;
+    }
+    window.addEventListener('resize', resizeScroller);
+    resizeScroller();
+
+    function updateSineScroller(time) {
+      const w = scrollCanvas.width;
+      const h = scrollCanvas.height;
+      scrollCtx.clearRect(0, 0, w, h);
+
+      scrollOffset += 3.2;
+      const charWidth = 22;
+      const totalWidth = SCROLL_TEXT.length * charWidth;
+      const startX = - (scrollOffset % totalWidth);
+
+      scrollCtx.font = 'bold 20px "Press Start 2P", monospace';
+      scrollCtx.textAlign = 'center';
+      scrollCtx.textBaseline = 'middle';
+
+      const baseY = h * 0.5;
+
+      for (let i = 0; i < SCROLL_TEXT.length; i++) {
+        const x = startX + i * charWidth;
+        if (x < -charWidth || x > w + charWidth) continue;
+
+        const char = SCROLL_TEXT[i];
+        // Amiga sine displacement
+        const y = baseY + Math.sin(x * 0.018 + time * 4.0) * 12;
+
+        // Amiga rainbow color gradient per character
+        const hue = (x * 0.5 + time * 90) % 360;
+
+        // Drop shadow
+        scrollCtx.fillStyle = '#000022';
+        scrollCtx.fillText(char, x + 2, y + 2);
+
+        // Gradient letter
+        scrollCtx.fillStyle = `hsl(${hue}, 100%, 65%)`;
+        scrollCtx.fillText(char, x, y);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 9. PROCEDURAL AMIGA 4-CHANNEL CHIPTUNE TRACKER SYNTH
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let isAudioPlaying = false;
+    let audioTimer = null;
+    let currentStep = 0;
+
+    // Upbeat Amiga Demoscene Chord Progression & Arpeggios (in Am)
+    const BASS_NOTES = [57, 57, 60, 57, 65, 65, 64, 60, 55, 55, 57, 55, 60, 62, 64, 67]; // MIDI notes
+    const ARP_CHORDS = [
+      [57, 60, 64, 69], // Am
+      [53, 57, 60, 65], // F
+      [55, 59, 62, 67], // G
+      [52, 55, 59, 64]  // Em
+    ];
+
+    function midiToFreq(m) {
+      return 440 * Math.pow(2, (m - 69) / 12);
+    }
+
+    function initAudio() {
+      if (audioCtx) return;
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContext();
+    }
+
+    function startTrackerPlayback() {
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      isAudioPlaying = true;
+      document.getElementById('btn-audio').classList.add('playing');
+      document.getElementById('btn-audio').innerText = '♪ GELUID: AAN';
+
+      const tempoBPM = 132;
+      const stepInterval = (60 / tempoBPM) / 4; // 16th notes
+
+      if (audioTimer) clearInterval(audioTimer);
+      audioTimer = setInterval(playStep, stepInterval * 1000);
+    }
+
+    function stopTrackerPlayback() {
+      isAudioPlaying = false;
+      if (audioTimer) clearInterval(audioTimer);
+      audioTimer = null;
+      document.getElementById('btn-audio').classList.remove('playing');
+      document.getElementById('btn-audio').innerText = '♪ GELUID: UIT';
+    }
+
+    function toggleAudio() {
+      if (isAudioPlaying) {
+        stopTrackerPlayback();
+      } else {
+        startTrackerPlayback();
+      }
+    }
+
+    function playStep() {
+      if (!audioCtx || !isAudioPlaying) return;
+      const now = audioCtx.currentTime;
+
+      const step16 = currentStep % 16;
+      const bar4 = Math.floor((currentStep / 16) % 4);
+
+      // --- CHANNEL 1: DRUMS (Kick & Snare & HiHat) ---
+      if (step16 === 0 || step16 === 8 || step16 === 10) {
+        // Kick
+        playKick(now);
+      }
+      if (step16 === 4 || step16 === 12) {
+        // Snare
+        playSnare(now);
+      }
+      if (step16 % 2 === 0) {
+        // HiHat
+        playHiHat(now, step16 % 4 === 2);
+      }
+
+      // --- CHANNEL 2: AMIGA SLAP/ACID BASS ---
+      const bassNote = BASS_NOTES[step16];
+      playBass(now, midiToFreq(bassNote - 12));
+
+      // --- CHANNEL 3: CHIPTUNE ARPEGGIO LEAD ---
+      const chord = ARP_CHORDS[bar4];
+      const arpNote = chord[step16 % chord.length];
+      playArpLead(now, midiToFreq(arpNote + 12));
+
+      // --- CHANNEL 4: SYNTH PAD CHORD ACCENT ---
+      if (step16 === 0 || step16 === 6 || step16 === 12) {
+        playPad(now, midiToFreq(chord[0]), midiToFreq(chord[2]));
+      }
+
+      currentStep++;
+    }
+
+    // Drum Synths
+    function playKick(t) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.frequency.setValueAtTime(150, t);
+      osc.frequency.exponentialRampToValueAtTime(35, t + 0.12);
+
+      gain.gain.setValueAtTime(0.7, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+
+      osc.start(t);
+      osc.stop(t + 0.18);
+    }
+
+    function playSnare(t) {
+      // Noise buffer for snappy Amiga snare
+      const bufferSize = audioCtx.sampleRate * 0.15;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+      }
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(800, t);
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.5, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      noise.start(t);
+      noise.stop(t + 0.15);
+    }
+
+    function playHiHat(t, open) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(open ? 9500 : 8000, t);
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(7000, t);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const dur = open ? 0.09 : 0.04;
+      gain.gain.setValueAtTime(open ? 0.12 : 0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+      osc.start(t);
+      osc.stop(t + dur);
+    }
+
+    // Melodic Synths
+    function playBass(t, freq) {
+      const osc = audioCtx.createOscillator();
+      const filter = audioCtx.createBiquadFilter();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, t);
+
+      // Paula lowpass resonance filter
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1400, t);
+      filter.frequency.exponentialRampToValueAtTime(300, t + 0.18);
+      filter.Q.setValueAtTime(5, t);
+
+      gain.gain.setValueAtTime(0.38, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.2);
+    }
+
+    function playArpLead(t, freq) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'square'; // Classic Commodore/Amiga pulse
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0.18, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.12);
+    }
+
+    function playPad(t, freq1, freq2) {
+      [freq1, freq2].forEach((f, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f * (idx === 1 ? 1.005 : 0.995), t); // subtle detune chorus
+
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.linearRampToValueAtTime(0.12, t + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.45);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 10. MOUSE & CAMERA CONTROLS
+    // -------------------------------------------------------------
+    let mouseX = 0, mouseY = 0;
+    let targetCamX = 0, targetCamY = 5, targetCamZ = 28;
+    let isMouseDown = false;
+
+    function setupTouchAndMouseControls() {
+      // Touch pinch & pan controls voor mobiel (GSM)
+      let initialPinchDistance = 0;
+      let startPinchScale = 1.0;
+      let isPinching = false;
+
+      window.addEventListener('touchstart', (e) => {
+        // Negeer touch op menuknoppen en top bar
+        if (e.target.closest('#ui-panel') || e.target.closest('#ui-toggle-btn') || e.target.closest('#amiga-bar') || e.target.closest('#start-screen')) {
+          return;
+        }
+
+        if (e.touches.length === 2) {
+          isPinching = true;
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          initialPinchDistance = Math.hypot(dx, dy);
+          startPinchScale = userTextScale;
+          showPinchHud(`🔍 TEKST: ${Math.round(userTextScale * 100)}%`);
+        } else if (e.touches.length === 1) {
+          isPinching = false;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (e.target.closest('#ui-panel') || e.target.closest('#start-screen')) {
+          return;
+        }
+
+        if (e.touches.length === 2 && initialPinchDistance > 0) {
+          if (e.cancelable) e.preventDefault(); // Voorkom default browser zoom
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          const currentDistance = Math.hypot(dx, dy);
+          const factor = currentDistance / initialPinchDistance;
+
+          // Vloeiend vergroten en verkleinen met de vingers
+          userTextScale = Math.max(0.35, Math.min(2.5, startPinchScale * factor));
+          updateScaleDisplay();
+        } else if (e.touches.length === 1 && !isPinching && !cinematicCam) {
+          // Hand cam rotatie met vinger op GSM
+          mouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+          mouseY = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) {
+          isPinching = false;
+          initialPinchDistance = 0;
+        }
+      }, { passive: true });
+
+      // Muis beweging
+      window.addEventListener('mousemove', (e) => {
+        if (!cinematicCam) {
+          mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+          mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+        }
+      });
+
+      // Muiswiel / trackpad pinch support
+      window.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          userTextScale = Math.max(0.35, Math.min(2.5, userTextScale - e.deltaY * 0.003));
+          updateScaleDisplay();
+          return;
+        }
+        if (!cinematicCam) {
+          targetCamZ += e.deltaY * 0.05;
+          targetCamZ = Math.max(12, Math.min(50, targetCamZ));
+        }
+      }, { passive: false });
+    }
+
+    function toggleCamMode() {
+      cinematicCam = !cinematicCam;
+      const btn = document.getElementById('btn-cam');
+      if (cinematicCam) {
+        btn.classList.add('active');
+        btn.innerText = 'CINEMA CAM';
+      } else {
+        btn.classList.remove('active');
+        btn.innerText = 'HAND CAM';
+      }
+    }
+
+    function toggleCRT() {
+      crtEnabled = !crtEnabled;
+      const crt = document.getElementById('crt-overlay');
+      const btn = document.getElementById('btn-crt');
+      if (crtEnabled) {
+        crt.classList.remove('disabled');
+        btn.classList.add('active');
+      } else {
+        crt.classList.add('disabled');
+        btn.classList.remove('active');
+      }
+    }
+
+    function updateCamera(time) {
+      if (cinematicCam) {
+        // Vloeiende dynamische Amiga demoscene camerazwaai (blijft altijd VÓÓR de letters!)
+        const camSway = Math.sin(time * 0.38) * 0.35; // zwaait soepel tussen -20° en +20°
+        const camDist = 28.0 + Math.sin(time * 0.28) * 3.0;
+        targetCamX = Math.sin(camSway) * camDist;
+        targetCamZ = Math.cos(camSway) * camDist; // Blijft altijd tussen +26 en +31, NOOIT achter de letters!
+        targetCamY = 3.8 + Math.sin(time * 0.45) * 2.2;
+      } else {
+        targetCamX = mouseX * 22;
+        targetCamY = 4 - mouseY * 12;
+        targetCamZ = 28;
+      }
+
+      camera.position.x += (targetCamX - camera.position.x) * 0.05;
+      camera.position.y += (targetCamY - camera.position.y) * 0.05;
+      camera.position.z += (targetCamZ - camera.position.z) * 0.05;
+      camera.lookAt(0, 3.0, 0);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // -------------------------------------------------------------
+    // 11. MAIN ANIMATION LOOP
+    // -------------------------------------------------------------
+    let frameCount = 0;
+    let lastFpsUpdate = 0;
+    const fpsMeter = document.getElementById('fps-meter');
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // FPS counter
+      frameCount++;
+      if (time - lastFpsUpdate > 0.5) {
+        const fps = Math.round(frameCount / (time - lastFpsUpdate));
+        fpsMeter.innerText = `${fps} FPS`;
+        frameCount = 0;
+        lastFpsUpdate = time;
+      }
+
+      // Update all scene elements
+      updateCopperBars(time);
+      updateStarfield(delta);
+      updateFloor(time);
+      updateBoingBall(time);
+      updateFlyingLetters(time);
+      checkModeCycle(time);
+      updateCamera(time);
+      updateSineScroller(time);
+
+      renderer.render(scene, camera);
+    }
+
+    // -------------------------------------------------------------
+    // 12. DEMO START
+    // -------------------------------------------------------------
+    function startDemo() {
+      const splash = document.getElementById('start-screen');
+      splash.style.transition = 'opacity 0.6s ease';
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 600);
+
+      // Start music automatically on user click
+      startTrackerPlayback();
+    }
+
+    // Kick off initialization
+    window.onload = () => {
+      initScene();
+      animate();
+    };
+  </script>
+</body>
+</html>
+
