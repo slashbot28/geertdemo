@@ -488,9 +488,9 @@
   <!-- Start Splash Screen for Audio Autoplay Policy -->
   <div id="start-screen" onclick="startDemo()">
     <div class="title-amiga">COMMODORE AMIGA 1200</div>
-    <div class="subtitle-geert">★ SUPERFX STUDIO ★</div>
+    <div class="subtitle-geert">★ GEERT VERHULST ★</div>
     <div style="font-size: 10px; color: #bbb; margin-bottom: 20px; line-height: 1.6; max-width: 580px;">
-      3D WEBGL DEMO • PAULA CHIPTUNE & ROCK SYNTH • VERLET CLOTH PHYSICS • BOIDS SWARM • RESONANT STRINGS
+      3D WEBGL DEMO • 3D DEMO • PAULA CHIPTUNE • SPECIAL BACKGROUND FX • VERLET STOF • BOIDS ZWERM
     </div>
     <div class="click-prompt">► KLIK HIER OM DE SUPER DEMO TE STARTEN ◄</div>
   </div>
@@ -499,15 +499,15 @@
   <div id="amiga-bar">
     <div class="amiga-badge">
       <span class="amiga-tick"></span>
-      <span>AMIGA AGA 1200</span>
+      <span>GEERT VERHULST</span>
     </div>
-    <div id="amiga-title-text" style="color: #ffd700;">★ AMIGA SUPERFX STUDIO ★</div>
+    <div id="amiga-title-text" style="color: #ffd700;">★ GEERT VERHULST — SUPERFX ★</div>
     <div class="top-actions">
       <div id="fps-meter">60 FPS</div>
       <button id="btn-auto-tour" class="retro-btn active" style="background:#005522; border-color:#00ff88; color:#aaffcc; font-size:7px; padding:3px 5px;" onclick="toggleAutoDirector()" title="Automatische Showreel Wisselaar">🎬 AUTO: AAN</button>
-      <a href="guru-emulation.adf" download="guru-emulation.adf" style="color: #00ffaa; text-decoration: none; font-size: 7.5px; border: 1px solid #00aa66; padding: 3px 5px; border-radius: 2px; background: rgba(0,50,20,0.6);" title="Download Amiga 1200 ADF Diskette">💾 ADF (880K)</a>
+      
       <a href="index.html" style="color: #00d4ff; text-decoration: none; font-size: 7.5px; border: 1px solid #0055aa; padding: 3px 5px; border-radius: 2px; background: rgba(0,0,50,0.5);">CLASSIC</a>
-      <a href="guru-emulation.html" style="color: #ffaa00; text-decoration: none; font-size: 7.5px; border: 1px solid #aa5500; padding: 3px 5px; border-radius: 2px; background: rgba(50,20,0,0.5);">GURU</a>
+      
       <button id="ui-toggle-btn" onclick="toggleUIPanel()">⚙ FX MENU</button>
     </div>
   </div>
@@ -515,16 +515,19 @@
   <!-- Main Multi-Tab Control Panel -->
   <div id="ui-panel">
     <div class="ui-panel-header">
-      <div style="color: #ffd700; font-size: 9px;">AMIGA SUPERFX CONTROLLER</div>
+      <div style="color: #ffd700; font-size: 9px;">GEERT DEMO BESTURING</div>
       <button class="close-btn" onclick="toggleUIPanel()" title="Sluiten">✕ SLUIT</button>
     </div>
 
+    
     <!-- Navigation Tabs -->
     <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('audio')">🎵 AUDIO FX</button>
+      <button class="tab-btn active" onclick="switchTab('bgfx')">🌌 ACHTERGROND FX</button>
       <button class="tab-btn" onclick="switchTab('physics')">⚡ FYSICA</button>
+      <button class="tab-btn" onclick="switchTab('audio')">🎵 AUDIO & FFT</button>
       <button class="tab-btn" onclick="switchTab('scene')">🎛️ 3D DEMO</button>
     </div>
+
 
     <!-- Auto-Director Status & Progress Strip -->
     <div style="background: rgba(0,0,0,0.55); border: 1px solid #0088ff; border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 4px;">
@@ -540,8 +543,40 @@
       </div>
     </div>
 
+    
+    <!-- TAB 0: SPECIAL / EXPERIMENTAL BACKGROUND FX (from superduperFX) -->
+    <div id="tab-bgfx" class="tab-content active">
+      <div class="section-title">
+        <span>SPECIAL / EXPERIMENTAL ACHTERGRONDEN</span>
+        <span style="color:#00ffcc;">● SUPERDUPERFX</span>
+      </div>
+      <div style="background: rgba(0,0,0,0.55); border: 1px solid #a855f7; border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 8px;">
+          <span style="color: #d8b4fe;">🌌 ACTIEVE ACHTERGROND:</span>
+          <button id="btn-bg-auto" class="retro-btn active" style="padding: 2px 6px; font-size: 7px; background:#4c1d95; border-color:#a855f7; color:#f3e8ff;" onclick="toggleAutoBg()">AUTO: AAN</button>
+        </div>
+        <div id="bg-active-title" style="color: #38bdf8; font-size: 8px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          GEOMETRIC LATTICE
+        </div>
+        <div class="btn-row" style="margin-top: 2px;">
+          <button class="retro-btn" style="padding: 4px 6px; flex: 1;" onclick="prevBgEffect()">◀ VORIGE ACHTERGROND</button>
+          <button class="retro-btn" style="padding: 4px 6px; flex: 1;" onclick="nextBgEffect()">VOLGENDE ACHTERGROND ▶</button>
+        </div>
+      </div>
+      <div class="section-title">KIES DIRECT EEN EFFECT:</div>
+      <div class="btn-row" style="flex-wrap: wrap;">
+        <button class="retro-btn" style="font-size:7px; padding:3px 5px;" onclick="setBgById('lattice')">💎 LATTICE</button>
+        <button class="retro-btn" style="font-size:7px; padding:3px 5px;" onclick="setBgById('mandala')">☸️ MANDALA</button>
+        <button class="retro-btn" style="font-size:7px; padding:3px 5px;" onclick="setBgById('chrome')">🪞 CHROME</button>
+        <button class="retro-btn" style="font-size:7px; padding:3px 5px;" onclick="setBgById('glsl027')">⚡ GLSL027</button>
+        <button class="retro-btn" style="font-size:7px; padding:3px 5px;" onclick="setBgById('drift')">🌊 DRIFT</button>
+        <button class="retro-btn" style="font-size:7px; padding:3px 5px;" onclick="setBgById('matrix')">📟 MATRIX</button>
+        <button class="retro-btn" style="font-size:7px; padding:3px 5px;" onclick="setBgById('phosphor')">✨ PHOSPHOR</button>
+      </div>
+    </div>
+
     <!-- TAB 1: AUDIO EFFECTS (from superduperFX) -->
-    <div id="tab-audio" class="tab-content active">
+    <div id="tab-audio" class="tab-content">
       <div class="section-title">
         <span>SPECTRUM & OSCILLOSCOOP</span>
         <span id="audio-active-badge" style="color:#10b981;">● PAULA ON</span>
@@ -552,28 +587,15 @@
         <div class="spectrum-legend" id="vis-label">FFT 64 BINS</div>
       </div>
 
-      <div class="section-title">8-BIT RETRO SOUNDBOARD (superduperFX):</div>
-      <div class="btn-row">
-        <button class="retro-btn sfx-btn" onclick="playSuperSFX('laser')">🔫 LASER</button>
-        <button class="retro-btn sfx-btn" onclick="playSuperSFX('coin')">🪙 MUNT</button>
-        <button class="retro-btn sfx-btn" onclick="playSuperSFX('jump')">🦘 JUMP</button>
-        <button class="retro-btn sfx-btn" onclick="playSuperSFX('explosion')">💥 BOEM</button>
-        <button class="retro-btn sfx-btn" onclick="playSuperSFX('powerup')">⚡ POWER</button>
-      </div>
+      
 
       <div class="section-title">MUZIEK & ROCK SYNTH:</div>
       <div class="btn-row">
         <button id="btn-audio" class="retro-btn" style="background:#440022; border-color:#ff0077;" onclick="toggleAudio()">♪ CHIPTUNE TRACKER</button>
-        <button id="btn-rock" class="retro-btn sfx-btn" onclick="toggleRockRiff()">🎸 ROCK RIFF (7-NATION)</button>
+        
       </div>
 
-      <div class="section-title">GELUIDSBRON & VORM:</div>
-      <div class="btn-row">
-        <button class="retro-btn active" id="btn-wave-square" onclick="setWaveform('square')">SQUARE</button>
-        <button class="retro-btn" id="btn-wave-saw" onclick="setWaveform('sawtooth')">SAWTOOTH</button>
-        <button class="retro-btn" id="btn-wave-tri" onclick="setWaveform('triangle')">TRIANGLE</button>
-      </div>
-      <button id="btn-mic" class="retro-btn" style="background:#0c4a6e; border-color:#0284c7;" onclick="toggleMicrophone()">🎙️ MICROFOON VJ REACTIE: UIT</button>
+      
     </div>
 
     <!-- TAB 2: PHYSICS & SIMULATIONS (from superduperFX) -->
@@ -582,7 +604,7 @@
       <div class="btn-row">
         <button id="btn-sim-cloth" class="retro-btn sim-btn active" onclick="toggleSim('cloth')">🧵 VERLET STOF</button>
         <button id="btn-sim-boids" class="retro-btn sim-btn" onclick="toggleSim('boids')">🦅 BOIDS ZWERM</button>
-        <button id="btn-sim-strings" class="retro-btn sim-btn" onclick="toggleSim('strings')">🎸 SNAREN (PLUCK)</button>
+        
       </div>
 
       <div id="cloth-controls">
@@ -606,24 +628,12 @@
         </div>
       </div>
 
-      <div id="strings-controls" style="display:none;">
-        <div class="section-title">AKOESTISCHE SNAREN CONTROLS:</div>
-        <div style="font-size:7px; color:#94a3b8; line-height:1.4;">
-          Beweeg je vinger/muis over de horizontale lijnen om de snaren te tokkelen!
-        </div>
-        <div class="btn-row">
-          <button class="retro-btn" onclick="strumAllStrings()">🎶 STRUM ALLE SNAREN</button>
-        </div>
-      </div>
+      
     </div>
 
     <!-- TAB 3: 3D DEMO & WEERGAVE -->
     <div id="tab-scene" class="tab-content">
-      <div class="section-title">3D TEKST KEUZE:</div>
-      <div class="btn-row">
-        <button id="btn-txt-guru" class="retro-btn active" onclick="switch3DText('GURU-EMULATION')">GURU-EMULATION</button>
-        <button id="btn-txt-geert" class="retro-btn" onclick="switch3DText('GEERT-VERHULST')">GEERT VERHULST</button>
-      </div>
+      
 
       <div class="section-title">TEKST FORMAAT (PINCH OF KNOP):</div>
       <div class="scale-control-box">
@@ -667,6 +677,7 @@
   <div id="pinch-hud">🔍 TEKST: 100%</div>
 
   <!-- Three.js Library with CDN Fallback -->
+  <script src="bg-effects.js"></script>
   <script src="three.min.js"></script>
   <script>
     if (typeof THREE === 'undefined') {
@@ -822,6 +833,31 @@
     let currentSceneIdx = 0;
     let copperPaletteOffset = 0;
 
+    
+    let autoBgActive = true;
+    function toggleAutoBg() {
+      autoBgActive = !autoBgActive;
+      const btn = document.getElementById('btn-bg-auto');
+      if (btn) {
+        btn.innerText = autoBgActive ? 'AUTO: AAN' : 'AUTO: UIT';
+        btn.style.background = autoBgActive ? '#4c1d95' : '#333';
+        btn.style.borderColor = autoBgActive ? '#a855f7' : '#666';
+      }
+      showPinchHud(autoBgActive ? '🌌 AUTO ACHTERGROND: AAN' : '🌌 AUTO ACHTERGROND: UIT');
+    }
+
+    function nextBgEffect() {
+      if (window.bgEngine) window.bgEngine.next();
+    }
+
+    function prevBgEffect() {
+      if (window.bgEngine) window.bgEngine.prev();
+    }
+
+    function setBgById(id) {
+      if (window.bgEngine) window.bgEngine.setEffectById(id);
+    }
+
     function toggleAutoDirector() {
       autoDirectorActive = !autoDirectorActive;
       const btn1 = document.getElementById('btn-auto-tour');
@@ -845,6 +881,7 @@
 
       setFlightMode(sc.flightMode);
       toggleSim(sc.sim);
+        if (window.bgEngine && autoBgActive && sc.bg) window.bgEngine.setEffectById(sc.bg);
 
       if (currentTextPreset !== sc.textPreset) {
         switch3DText(sc.textPreset);
@@ -853,7 +890,7 @@
       copperPaletteOffset = sc.copperHue;
 
       if (audioCtx && audioCtx.state === 'running') {
-        playSuperSFX(sc.sfx);
+        playSceneTransitionJingle();
       }
 
       showPinchHud(sc.title);
@@ -1022,6 +1059,18 @@
 
       window.addEventListener('resize', onWindowResize);
       setupTouchAndMouseControls();
+
+      // Initialize Special/Experimental Background Engine from superduperFX
+      if (window.SuperFXBackgroundEngine) {
+        window.bgEngine = new SuperFXBackgroundEngine();
+        window.bgEngine.init(document.body);
+        window.bgEngine.onEffectChange((eff) => {
+          const titleEl = document.getElementById('bg-active-title');
+          if (titleEl) titleEl.innerText = eff.fullTitle || eff.title;
+          showPinchHud('🌌 BG: ' + (eff.title || '').toUpperCase());
+        });
+      }
+
       checkInitialUIVisibility();
       initPhysicsLayer();
     }
@@ -1355,22 +1404,39 @@
             rz = Math.cos(time * 2.0 + i * 0.25) * 0.15;
             break;
 
-          case 2: // ORBIT CAROUSEL
-            const angle = time * 1.2 + (i / count) * Math.PI * 2;
-            const radius = (13.0 + Math.sin(time * 1.8 + i * 0.4) * 1.8) * Math.max(0.5, Math.min(1.3, effectiveScale));
-            tx = Math.cos(angle) * radius;
-            tz = Math.sin(angle) * radius;
-            ty = Math.sin(angle) * 0.35 * radius + Math.sin(time * 2.8 + i * 0.5) * 1.8 + 2.5;
-            useLookAtCamera = true;
+          case 2: // MODE 2: 3D ORBIT CAROUSEL (Rondom de Boing Ball)
+            // Left-to-right horseshoe orbit arc: G is on the left, T is on the right - NEVER inverse!
+            const orbitArc = 0.22;
+            const centerSway = Math.sin(time * 0.9) * 0.45;
+            const orbitAngle = centerSway + (i - (count - 1) / 2) * orbitArc;
+            const orbitRadius = 16.0 * Math.max(0.6, Math.min(1.2, effectiveScale));
+
+            tx = Math.sin(orbitAngle) * orbitRadius;
+            tz = Math.cos(orbitAngle) * orbitRadius - 2.0;
+            ty = 3.0 + Math.sin(time * 2.5 + i * 0.3) * 1.5 + Math.cos(orbitAngle) * 1.0;
+
+            // Letters curve naturally facing the viewer upright without mirroring
+            rx = Math.sin(time * 2.0 + i * 0.2) * 0.12;
+            ry = -orbitAngle * 0.65;
+            rz = Math.sin(time * 1.8 + i * 0.2) * 0.08;
+            useLookAtCamera = false;
             break;
 
-          case 3: // 3D VORTEX
-            const vPhase = (time * 1.5 + (i / count) * Math.PI * 2);
-            const vRad = (8.0 + Math.sin(time * 2.5 + i * 0.3) * 3.5) * Math.max(0.5, Math.min(1.3, effectiveScale));
-            tx = Math.cos(vPhase) * vRad;
-            ty = Math.sin(vPhase) * (vRad * 0.55) + 3.0;
-            tz = 5.0 + Math.cos(time * 2.0 + i * 0.4) * 3.0;
-            useLookAtCamera = true;
+          case 3: // MODE 3: 3D VORTEX HELIX
+            // Wave travels through GEERT VERHULST from left to right - NEVER inverse!
+            const vSpacing = 2.3 * Math.max(0.6, Math.min(1.2, effectiveScale));
+            const baseX = (i - (count - 1) / 2) * vSpacing;
+            const vPhase = time * 3.2 - i * 0.5;
+            const vRadius = 2.5 + Math.sin(time * 2.2 + i * 0.25) * 1.0;
+
+            tx = baseX + Math.cos(vPhase) * 1.2;
+            ty = 3.0 + Math.sin(vPhase) * vRadius;
+            tz = 3.5 + Math.cos(vPhase) * 2.8;
+
+            rx = Math.sin(vPhase) * 0.25;
+            ry = Math.cos(vPhase * 0.8) * 0.2;
+            rz = Math.sin(vPhase * 0.6) * 0.12;
+            useLookAtCamera = false;
             break;
         }
 
@@ -1425,207 +1491,7 @@
       }
     }
 
-    function setWaveform(type) {
-      selectedWaveform = type;
-      ['square', 'sawtooth', 'triangle'].forEach(w => {
-        const btn = document.getElementById('btn-wave-' + (w === 'sawtooth' ? 'saw' : (w === 'triangle' ? 'tri' : 'square')));
-        if (btn) btn.classList.toggle('active', w === type);
-      });
-      showPinchHud(`WAVEFORM: ${type.toUpperCase()}`);
-    }
-
-    // Soundboard SFX from superduperFX
-    function playSuperSFX(type) {
-      initAudioSystem();
-      if (!audioCtx) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const now = audioCtx.currentTime;
-      osc.type = selectedWaveform;
-
-      if (type === 'laser') {
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.exponentialRampToValueAtTime(110, now + 0.16);
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-        osc.connect(gain); gain.connect(masterGain);
-        osc.start(now); osc.stop(now + 0.16);
-        showPinchHud('🔫 LASER BLASTER');
-      } else if (type === 'coin') {
-        osc.frequency.setValueAtTime(987.77, now);
-        osc.frequency.setValueAtTime(1318.51, now + 0.08);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-        osc.connect(gain); gain.connect(masterGain);
-        osc.start(now); osc.stop(now + 0.35);
-        showPinchHud('🪙 RETRO MUNT');
-      } else if (type === 'jump') {
-        osc.frequency.setValueAtTime(150, now);
-        osc.frequency.exponentialRampToValueAtTime(650, now + 0.22);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-        osc.connect(gain); gain.connect(masterGain);
-        osc.start(now); osc.stop(now + 0.22);
-        showPinchHud('🦘 8-BIT SPRONG');
-      } else if (type === 'explosion') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(260, now);
-        osc.frequency.exponentialRampToValueAtTime(30, now + 0.45);
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-        osc.connect(gain); gain.connect(masterGain);
-        osc.start(now); osc.stop(now + 0.45);
-        showPinchHud('💥 AMIGA EXPLOSIE');
-      } else if (type === 'powerup') {
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.linearRampToValueAtTime(880, now + 0.28);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-        osc.connect(gain); gain.connect(masterGain);
-        osc.start(now); osc.stop(now + 0.32);
-        showPinchHud('⚡ POWER-UP BOOST');
-      }
-    }
-
-    // Rock Guitar Riff ("The White Stripes" from superduperFX ccrch)
-    const rockNotes = [
-      { f: 164.81, d: 0.45 }, // E3
-      { f: 164.81, d: 0.25 }, // E3
-      { f: 196.00, d: 0.30 }, // G3
-      { f: 164.81, d: 0.30 }, // E3
-      { f: 146.83, d: 0.30 }, // D3
-      { f: 130.81, d: 0.60 }, // C3
-      { f: 123.47, d: 0.60 }  // B2
-    ];
-    let rockStep = 0;
-
-    function toggleRockRiff() {
-      initAudioSystem();
-      if (!audioCtx) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      isRockRiffPlaying = !isRockRiffPlaying;
-      const btn = document.getElementById('btn-rock');
-
-      if (isRockRiffPlaying) {
-        btn.classList.add('active');
-        btn.innerText = '⏹ STOP ROCK RIFF';
-        showPinchHud('🎸 SEVEN NATION RIFF ACTIEF');
-        rockStep = 0;
-
-        rockTimer = setInterval(() => {
-          if (!isRockRiffPlaying) return;
-          const note = rockNotes[rockStep % rockNotes.length];
-          const now = audioCtx.currentTime;
-
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(note.f, now);
-
-          gain.gain.setValueAtTime(0.35, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + note.d);
-
-          osc.connect(gain);
-          gain.connect(masterGain);
-          osc.start(now);
-          osc.stop(now + note.d);
-
-          rockStep++;
-        }, 340);
-      } else {
-        btn.classList.remove('active');
-        btn.innerText = '🎸 ROCK RIFF (7-NATION)';
-        clearInterval(rockTimer);
-      }
-    }
-
-    // Chiptune Tracker Melodie
-    const CHORD_PROGRESSION = [
-      [60, 63, 67], [56, 60, 63], [58, 62, 65], [55, 58, 62]
-    ];
-    const LEAD_MELODY = [
-      72, 75, 74, 72, 75, 79, 77, 75,
-      74, 72, 74, 75, 74, 70, 72, 74
-    ];
-    let trackerStep = 0;
-
-    function toggleAudio() {
-      initAudioSystem();
-      if (!audioCtx) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      isTrackerPlaying = !isTrackerPlaying;
-      const btn = document.getElementById('btn-audio');
-
-      if (isTrackerPlaying) {
-        btn.classList.add('active');
-        btn.innerText = '♪ GELUID: AAN';
-        document.getElementById('audio-active-badge').innerText = '● TRACKER LIVE';
-        document.getElementById('audio-active-badge').style.color = '#00ffff';
-
-        trackerTimer = setInterval(() => {
-          if (!isTrackerPlaying) return;
-          const now = audioCtx.currentTime;
-          const chord = CHORD_PROGRESSION[Math.floor(trackerStep / 16) % CHORD_PROGRESSION.length];
-
-          // Bass
-          const bassNote = chord[0] - 24;
-          const oscB = audioCtx.createOscillator();
-          const gainB = audioCtx.createGain();
-          oscB.type = 'sawtooth';
-          oscB.frequency.setValueAtTime(440 * Math.pow(2, (bassNote - 69) / 12), now);
-          gainB.gain.setValueAtTime(0.2, now);
-          gainB.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-          oscB.connect(gainB); gainB.connect(masterGain);
-          oscB.start(now); oscB.stop(now + 0.16);
-
-          // Lead Arp
-          const leadNote = LEAD_MELODY[trackerStep % LEAD_MELODY.length];
-          const oscL = audioCtx.createOscillator();
-          const gainL = audioCtx.createGain();
-          oscL.type = selectedWaveform;
-          oscL.frequency.setValueAtTime(440 * Math.pow(2, (leadNote - 69) / 12), now);
-          gainL.gain.setValueAtTime(0.18, now);
-          gainL.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-          oscL.connect(gainL); gainL.connect(masterGain);
-          oscL.start(now); oscL.stop(now + 0.12);
-
-          trackerStep++;
-        }, 125);
-      } else {
-        btn.classList.remove('active');
-        btn.innerText = '♪ GELUID: UIT';
-        document.getElementById('audio-active-badge').innerText = '● STANDBY';
-        document.getElementById('audio-active-badge').style.color = '#10b981';
-        clearInterval(trackerTimer);
-      }
-    }
-
-    // Microphone Audio-Reactivity
-    async function toggleMicrophone() {
-      initAudioSystem();
-      const btn = document.getElementById('btn-mic');
-
-      if (!isMicActive) {
-        try {
-          micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          const micSource = audioCtx.createMediaStreamSource(micStream);
-          micSource.connect(analyser); // Analyser only, do not loop to speakers to prevent feedback!
-          isMicActive = true;
-          btn.innerText = '🎙️ MICROFOON VJ: AAN';
-          btn.classList.add('active');
-          showPinchHud('🎙️ LIVE VJ MODE ACTIEF!');
-        } catch (err) {
-          alert('Microfoontoegang niet toegestaan of niet beschikbaar.');
-        }
-      } else {
-        if (micStream) micStream.getTracks().forEach(t => t.stop());
-        isMicActive = false;
-        btn.innerText = '🎙️ MICROFOON VJ REACTIE: UIT';
-        btn.classList.remove('active');
-      }
-    }
+    // Waveform & mic removed as requested
 
     // Spectrum Analyzer Visualizer Drawing
     const specCanvas = document.getElementById('audio-vis-canvas');
@@ -1695,7 +1561,7 @@
       window.addEventListener('resize', resizePhysics);
       setupClothSimulation();
       setupBoidsSimulation();
-      setupStringsSimulation();
+      
       setupPhysicsInteractions();
     }
 
@@ -1706,7 +1572,7 @@
 
     function toggleSim(simType) {
       activeSimulation = simType;
-      ['cloth', 'boids', 'strings'].forEach(s => {
+      ['cloth', 'boids'].forEach(s => {
         const btn = document.getElementById('btn-sim-' + s);
         if (btn) btn.classList.toggle('active', s === simType);
         const ctrl = document.getElementById(s + '-controls');
@@ -1858,7 +1724,7 @@
         b.vx += (Math.random() - 0.5) * 16;
         b.vy += (Math.random() - 0.5) * 16;
       });
-      playSuperSFX('explosion');
+      playSceneTransitionJingle();
     }
 
     function updateAndDrawBoids() {
@@ -1936,151 +1802,7 @@
       }
     }
 
-    // --- SUB-SIM 3: ACOUSTIC RESONANT STRINGS ---
-    let strings = [];
-    const STRING_COUNT = 6;
-    const STRING_NOTES = [220, 277.18, 329.63, 440, 554.37, 659.25];
-
-    function setupStringsSimulation() {
-      strings = [];
-      const spacing = physCanvas.height / (STRING_COUNT + 1);
-      for (let i = 0; i < STRING_COUNT; i++) {
-        const y = spacing * (i + 1);
-        const pts = [];
-        const segs = 32;
-        for (let j = 0; j <= segs; j++) {
-          pts.push({
-            x: (physCanvas.width / segs) * j,
-            y: y,
-            baseY: y,
-            vy: 0
-          });
-        }
-        strings.push({ pts: pts, note: STRING_NOTES[i], y: y });
-      }
-    }
-
-    function strumAllStrings() {
-      strings.forEach(s => {
-        s.pts.forEach(p => p.vy = (Math.random() - 0.5) * 35);
-        playPluckSound(s.note);
-      });
-    }
-
-    function playPluckSound(freq) {
-      initAudioSystem();
-      if (!audioCtx) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
-      osc.connect(gain);
-      gain.connect(masterGain);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 1.2);
-    }
-
-    function updateAndDrawStrings() {
-      physCtx.lineWidth = 2.5;
-
-      strings.forEach((s) => {
-        // Wave physics
-        for (let i = 1; i < s.pts.length - 1; i++) {
-          const p = s.pts[i];
-          const force = (s.pts[i - 1].y + s.pts[i + 1].y - 2 * p.y) * 0.05 + (p.baseY - p.y) * 0.04;
-          p.vy = (p.vy + force) * 0.985;
-          p.y += p.vy;
-
-          // Pluck check with mouse
-          if (physMouse.y !== -9999 && physMouse.py !== -9999) {
-            const minMY = Math.min(physMouse.y, physMouse.py);
-            const maxMY = Math.max(physMouse.y, physMouse.py);
-            if (p.baseY >= minMY && p.baseY <= maxMY && Math.abs(physMouse.x - p.x) < 25) {
-              p.vy += (physMouse.y - physMouse.py) * 1.5;
-              playPluckSound(s.note);
-            }
-          }
-        }
-
-        // Draw glowing string
-        physCtx.beginPath();
-        physCtx.strokeStyle = '#00d4ff';
-        physCtx.moveTo(s.pts[0].x, s.pts[0].y);
-        for (let i = 1; i < s.pts.length; i++) {
-          physCtx.lineTo(s.pts[i].x, s.pts[i].y);
-        }
-        physCtx.stroke();
-      });
-    }
-
-    // Unified Physics Interaction Handler
-    function setupPhysicsInteractions() {
-      const getPos = (e) => {
-        const rect = physCanvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: clientX - rect.left, y: clientY - rect.top };
-      };
-
-      window.addEventListener('mousedown', (e) => {
-        if (e.target.closest('#ui-panel') || e.target.closest('#amiga-bar')) return;
-        physMouse.down = true;
-        physMouse.button = e.button;
-        const pos = getPos(e);
-        physMouse.px = physMouse.x = pos.x;
-        physMouse.py = physMouse.y = pos.y;
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        const pos = getPos(e);
-        physMouse.px = physMouse.x;
-        physMouse.py = physMouse.y;
-        physMouse.x = pos.x;
-        physMouse.y = pos.y;
-      });
-
-      window.addEventListener('mouseup', () => { physMouse.down = false; });
-      physCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-      // Touch events for mobile
-      window.addEventListener('touchstart', (e) => {
-        if (e.target.closest('#ui-panel') || e.target.closest('#amiga-bar')) return;
-        if (e.touches.length === 1) {
-          physMouse.down = true;
-          physMouse.button = 0;
-          const pos = getPos(e);
-          physMouse.px = physMouse.x = pos.x;
-          physMouse.py = physMouse.y = pos.y;
-        }
-      }, { passive: true });
-
-      window.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 1 && !e.target.closest('#ui-panel')) {
-          const pos = getPos(e);
-          physMouse.px = physMouse.x;
-          physMouse.py = physMouse.y;
-          physMouse.x = pos.x;
-          physMouse.y = pos.y;
-        }
-      }, { passive: true });
-
-      window.addEventListener('touchend', () => { physMouse.down = false; }, { passive: true });
-    }
-
-    function renderPhysicsLayer() {
-      physCtx.clearRect(0, 0, physCanvas.width, physCanvas.height);
-      if (activeSimulation === 'cloth') {
-        updateAndDrawCloth();
-      } else if (activeSimulation === 'boids') {
-        updateAndDrawBoids();
-      } else if (activeSimulation === 'strings') {
-        updateAndDrawStrings();
-      }
-    }
+    // Resonant strings removed as requested
 
     // -------------------------------------------------------------
     // 10. MOUSE & TOUCH CAMERA / PINCH-TO-ZOOM CONTROLS
@@ -2196,7 +1918,7 @@
     // -------------------------------------------------------------
     const scrollCanvas = document.getElementById('scroller-canvas');
     const scrollCtx = scrollCanvas.getContext('2d');
-    const SCROLL_TEXT = "    +++ AMIGA 1200 AGA SUPERFX STUDIO +++ VOLLEDIGE AUDIO EFFECTS SOUNDBOARD (LASER, MUNT, EXPLOSIE, ROCK RIFF, PAULA CHIPTUNE) +++ INTERACTIEVE VERLET STOF SIMULATIE (TREK EN SCHEUR!) +++ BOIDS ZWERM FYSICA +++ AKOESTISCHE RESONANTE SNAREN +++ MET JE VINGERS ZOOMEN OP GSM +++ GENIET VAN DE BOING BALL EN 3D EFFECTEN! +++             ";
+    const SCROLL_TEXT = "    +++ COMMODORE AMIGA 1200 AGA +++ SPECIAL / EXPERIMENTAL ACHTERGRONDEN UIT SUPERDUPERFX: GEOMETRIC LATTICE, MANIFOLD MANDALA, LIQUID CHROME, GLSL SAMPLE027, GRADIENT DRIFT, ASCII MATRIX & PHOSPHORESCENCE +++ INTERACTIEVE VERLET STOF SIMULATIE +++ CRAIG REYNOLDS BOIDS ZWERM FYSICA +++ PAULA CHIPTUNE TRACKER +++ MET JE VINGERS ZOOMEN OP GSM +++ GEERT VERHULST +++             ";
     let scrollOffset = 0;
 
     function resizeScroller() {
@@ -2260,6 +1982,7 @@
       updateStarfield(delta);
       updateFloor(time);
       updateBoingBall(time);
+      if (window.bgEngine) window.bgEngine.render(time);
       updateFlyingLetters(time);
       updateCamera(time);
       updateSineScroller(time);
