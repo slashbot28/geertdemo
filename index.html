@@ -408,6 +408,7 @@
     <div id="amiga-title-text" style="color: #ffd700;">★ GEERT VERHULST DEMO ★</div>
     <div style="display: flex; align-items: center; gap: 6px;">
       <div id="fps-meter">60 FPS</div>
+      <button id="btn-auto-tour" class="retro-btn active" style="background:#005522; border-color:#00ff88; color:#aaffcc; font-size:7px; padding:3px 5px;" onclick="toggleAutoDirector()" title="Automatische Showreel Wisselaar">🎬 AUTO: AAN</button>
       <a href="guru-emulation.adf" download="guru-emulation.adf" style="color: #00ffaa; text-decoration: none; font-size: 7.5px; border: 1px solid #00aa66; padding: 3px 5px; border-radius: 2px; background: rgba(0,50,20,0.6);" title="Download Amiga 1200 ADF Diskette">💾 ADF (880K)</a>
       <a href="amiga-superfx.html" style="color: #ff00aa; text-decoration: none; font-size: 7.5px; border: 1px solid #aa0066; padding: 3px 5px; border-radius: 2px; background: rgba(50,0,30,0.5);" title="Audio & Fysica SuperFX">⚡ SUPERFX</a>
       <button id="ui-toggle-btn" onclick="toggleUIPanel()">⚙ BESTURING</button>
@@ -419,6 +420,20 @@
     <div class="ui-panel-header">
       <div class="ui-header" style="margin-bottom:0;">DEMO BESTURING</div>
       <button class="close-btn" onclick="toggleUIPanel()" title="Sluiten">✕ SLUIT</button>
+    </div>
+
+    <!-- Auto-Director Status & Progress Strip -->
+    <div style="background: rgba(0,0,0,0.55); border: 1px solid #0088ff; border-radius: 4px; padding: 6px; display: flex; flex-direction: column; gap: 4px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 8px;">
+        <span style="color: #ffd700;">🎬 EFFECTEN-WISSELAAR:</span>
+        <button id="btn-tour-toggle" class="retro-btn active" style="padding: 2px 6px; font-size: 7px; background:#005522; border-color:#00ff88; color:#aaffcc;" onclick="toggleAutoDirector()">AAN</button>
+      </div>
+      <div id="tour-scene-title" style="color: #00ffff; font-size: 7.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        SCÈNE 1/4: HERO GOLF
+      </div>
+      <div style="width: 100%; height: 4px; background: #001133; border-radius: 2px; overflow: hidden;">
+        <div id="tour-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00d4ff, #ff00aa); transition: width 0.2s linear;"></div>
+      </div>
     </div>
     <button id="btn-audio" class="retro-btn audio-btn" onclick="toggleAudio()">♪ GELUID: AAN</button>
 
@@ -1158,13 +1173,55 @@
       });
     }
 
-    // Auto cycle flight modes om de 20 seconden
+    // -------------------------------------------------------------
+    // AUTOMATISCHE EFFECTEN-WISSELAAR (AUTO-DIRECTOR)
+    // -------------------------------------------------------------
+    const GEERT_SCENES = [
+      { id: 0, title: 'SCÈNE 1/4: HERO GOLF (AMIGA CLASSIC)', mode: 0 },
+      { id: 1, title: 'SCÈNE 2/4: 3D BANNER VLUCHT', mode: 1 },
+      { id: 2, title: 'SCÈNE 3/4: 3D ORBIT CAROUSEL', mode: 2 },
+      { id: 3, title: 'SCÈNE 4/4: 3D VORTEX PULSE', mode: 3 }
+    ];
+
+    let autoDirectorActive = true;
+    let sceneDuration = 12.0; // Wisselt elke 12 seconden
     let lastModeSwitch = 0;
+    let currentSceneIdx = 0;
+
+    function toggleAutoDirector() {
+      autoDirectorActive = !autoDirectorActive;
+      const btn1 = document.getElementById('btn-auto-tour');
+      const btn2 = document.getElementById('btn-tour-toggle');
+      if (btn1) {
+        btn1.innerText = autoDirectorActive ? '🎬 AUTO: AAN' : '🎬 AUTO: UIT';
+        btn1.classList.toggle('active', autoDirectorActive);
+        btn1.style.background = autoDirectorActive ? '#005522' : '#331100';
+        btn1.style.borderColor = autoDirectorActive ? '#00ff88' : '#ff4400';
+      }
+      if (btn2) {
+        btn2.innerText = autoDirectorActive ? 'AAN' : 'UIT';
+        btn2.classList.toggle('active', autoDirectorActive);
+      }
+      showPinchHud(autoDirectorActive ? '🎬 AUTO-TOUR GEACTIVEERD' : '⏸️ AUTO-TOUR GEPAUZEERD');
+    }
+
     function checkModeCycle(time) {
-      if (time - lastModeSwitch > 20.0) {
+      if (!autoDirectorActive) return;
+
+      const elapsed = time - lastModeSwitch;
+      const progress = Math.min(100, Math.max(0, (elapsed / sceneDuration) * 100));
+      const bar = document.getElementById('tour-progress-bar');
+      if (bar) bar.style.width = `${progress}%`;
+
+      if (elapsed >= sceneDuration) {
         lastModeSwitch = time;
-        flightMode = (flightMode + 1) % 4;
+        currentSceneIdx = (currentSceneIdx + 1) % GEERT_SCENES.length;
+        const sc = GEERT_SCENES[currentSceneIdx];
+        flightMode = sc.mode;
         updateModeButtons();
+        showPinchHud(sc.title);
+        const titleEl = document.getElementById('tour-scene-title');
+        if (titleEl) titleEl.innerText = sc.title;
       }
     }
 
